@@ -108,7 +108,21 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = "admin:login"
+# TR: Giriş/çıkış yönlendirmeleri
+# ES: Redirecciones de inicio y cierre de sesión
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "spaces:list"
+LOGOUT_REDIRECT_URL = "home"
+
+# TR: Kayıtta kabul edilen kurumsal e-posta alan adları (alt alan adları da kabul edilir,
+#     ör. "gumushane.edu.tr" yazılırsa "ogr.gumushane.edu.tr" de geçerlidir)
+# ES: Dominios de correo institucional aceptados en el registro (también se aceptan subdominios,
+#     p. ej., si se pone "gumushane.edu.tr", "ogr.gumushane.edu.tr" también es válido)
+ALLOWED_EMAIL_DOMAINS = [
+    d.strip().lower()
+    for d in os.environ.get("ALLOWED_EMAIL_DOMAINS", "gumushane.edu.tr").split(",")
+    if d.strip()
+]
 
 
 # TR: E-posta — geliştirmede e-postalar gönderilmez, konsola yazdırılır

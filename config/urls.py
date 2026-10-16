@@ -1,9 +1,9 @@
 """
-TR: Ana URL yönlendirmeleri.
-ES: Rutas URL principales.
+TR: Ana URL yönlendirmeleri. Adresler kullanıcıya göründüğü için Türkçedir.
+ES: Rutas URL principales. Las direcciones están en turco porque las ve el usuario.
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from django.views.generic import TemplateView
 
 # TR: Yönetim paneli başlıkları (Türkçe)
@@ -14,7 +14,8 @@ admin.site.index_title = "Yönetim"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # TR: Geçici ana sayfa — ilerleyen sprintlerde gerçek görünümlerle değiştirilecek
-    # ES: Página de inicio temporal — se sustituirá por vistas reales en los próximos sprints
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path("hesap/", include("accounts.urls")),
+    path("alanlar/", include("spaces.urls")),
+    path("rezervasyonlarim/", include("reservations.urls")),
 ]
