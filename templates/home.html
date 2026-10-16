@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa · KampüsRez{% endblock %}
+
+{% block content %}
+    {# TR: Geçici ana sayfa — takvim ve rezervasyon ekranları sonraki sprintlerde eklenecek #}
+    {# ES: Página de inicio temporal — el calendario y las pantallas de reserva se añadirán en próximos sprints #}
+    <section class="hero">
+        <h1>KampüsRez</h1>
+        <p>Derslik, laboratuvar ve çalışma alanı rezervasyon sistemi</p>
+    </section>
+
+    <section class="cards">
+        <div class="card">
+            <h2>Derslikler</h2>
+            <p>Ek ders, telafi dersi ve sunumlar için boş derslikleri bulun.</p>
+        </div>
+        <div class="card">
+            <h2>Laboratuvarlar</h2>
+            <p>Bilgisayar laboratuvarlarını personel onayıyla rezerve edin.</p>
+        </div>
+        <div class="card">
+            <h2>Çalışma Alanları</h2>
+            <p>Grup çalışmaları için anında onaylanan rezervasyon yapın.</p>
+        </div>
+    </section>
+{% endblock %}

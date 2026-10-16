@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KampüsRez{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {# TR: Tüm sayfalarda ortak üst menü / ES: Menú superior común a todas las páginas #}
+    <header class="topbar">
+        <a href="{% url 'home' %}" class="brand">KampüsRez</a>
+        <nav>
+            {% if user.is_authenticated %}
+                <span>{{ user }}</span>
+                {% if user.is_staff %}<a href="{% url 'admin:index' %}">Yönetim Paneli</a>{% endif %}
+            {% else %}
+                <a href="{% url 'admin:login' %}">Giriş Yap</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="container">
+        {# TR: Sistem mesajları (başarı, hata) / ES: Mensajes del sistema (éxito, error) #}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        KampüsRez · Gümüşhane Üniversitesi · Web Proje Yönetimi
+    </footer>
+</body>
+</html>
