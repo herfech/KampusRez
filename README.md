@@ -74,6 +74,9 @@ cp .env.example .env           # macOS / Linux
 python manage.py migrate
 python manage.py createsuperuser
 
+# (İsteğe bağlı) Örnek alanları yükleyin
+python manage.py demo_data
+
 # 6. Sunucuyu başlatın
 python manage.py runserver
 ```
