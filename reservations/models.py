@@ -163,6 +163,14 @@ class Reservation(models.Model):
         )
         return count >= self.space.weekly_limit
 
+    @property
+    def can_be_cancelled(self):
+        """
+        TR: Sadece henüz başlamamış, beklemede veya onaylanmış rezervasyonlar iptal edilebilir.
+        ES: Solo se pueden cancelar reservas pendientes o aprobadas que aún no han empezado.
+        """
+        return self.status in self.ACTIVE_STATUSES and self.start_time > timezone.now()
+
     def save(self, *args, **kwargs):
         # TR: Onay gerektirmeyen alanlarda (ör. çalışma salonu) yeni rezervasyon anında onaylanır
         # ES: En espacios que no requieren aprobación (p. ej., sala de estudio) la reserva nueva se aprueba al instante

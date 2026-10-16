@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ space.name }} · KampüsRez{% endblock %}
+
+{% block content %}
+    <a href="{% url 'spaces:list' %}" class="back">← Alanlar</a>
+
+    <div class="detail-header">
+        <div>
+            <span class="badge">{{ space.get_space_type_display }}</span>
+            <h1>{{ space.name }}</h1>
+            <p class="muted">{{ space.building }}{% if space.floor %} · Kat: {{ space.floor }}{% endif %} · {{ space.capacity }} kişi</p>
+        </div>
+        <a href="{% url 'reservations:create' space.pk %}" class="button">Rezervasyon Yap</a>
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <h2>Donanım</h2>
+            <p>{{ space.equipment|default:"Belirtilmemiş"|linebreaksbr }}</p>
+        </div>
+        <div class="card">
+            <h2>Kurallar</h2>
+            <ul class="plain">
+                <li>Tek seferde en fazla {{ space.max_duration_hours }} saat</li>
+                <li>Haftada en fazla {{ space.weekly_limit }} rezervasyon</li>
+                <li>En fazla {{ space.max_advance_days }} gün önceden</li>
+                <li>{% if space.requires_approval %}Personel onayı gerekir{% else %}Anında onaylanır{% endif %}</li>
+            </ul>
+        </div>
+    </div>
+
+    {# TR: Dolu saatler — kimin rezerve ettiği gösterilmez (KVKK) #}
+    {# ES: Horas ocupadas — no se muestra quién reservó (KVKK) #}
+    <h2>Müsaitlik</h2>
+    <table class="table">
+        <thead><tr><th>Gün</th><th>Dolu saatler</th></tr></thead>
+        <tbody>
+            {% for item in schedule %}
+                <tr>
+                    <td>{{ item.day|date:"d.m.Y l" }}</td>
+                    <td>
+                        {% for r in item.busy %}
+                            <span class="slot busy">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</span>
+                        {% empty %}
+                            <span class="slot free">Tüm gün boş</span>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

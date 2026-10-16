@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Giriş Yap · KampüsRez{% endblock %}
+
+{% block content %}
+    <div class="form-card">
+        <h1>Giriş Yap</h1>
+        <form method="post">
+            {% csrf_token %}
+            {% include "partials/form_fields.html" %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit" class="button full">Giriş Yap</button>
+        </form>
+        <p class="muted center">Hesabınız yok mu? <a href="{% url 'accounts:register' %}">Kayıt olun</a></p>
+    </div>
+{% endblock %}

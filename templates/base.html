@@ -13,10 +13,17 @@
         <a href="{% url 'home' %}" class="brand">KampüsRez</a>
         <nav>
             {% if user.is_authenticated %}
-                <span>{{ user }}</span>
+                <a href="{% url 'spaces:list' %}">Alanlar</a>
+                <a href="{% url 'reservations:my' %}">Rezervasyonlarım</a>
                 {% if user.is_staff %}<a href="{% url 'admin:index' %}">Yönetim Paneli</a>{% endif %}
+                {# TR: Çıkış POST ile yapılır / ES: El cierre de sesión se hace por POST #}
+                <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="link-button">Çıkış ({{ user.first_name|default:user.username }})</button>
+                </form>
             {% else %}
-                <a href="{% url 'admin:login' %}">Giriş Yap</a>
+                <a href="{% url 'accounts:login' %}">Giriş Yap</a>
+                <a href="{% url 'accounts:register' %}">Kayıt Ol</a>
             {% endif %}
         </nav>
     </header>

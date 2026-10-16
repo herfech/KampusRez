@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from accounts.models import User
@@ -104,3 +105,71 @@ class ReservationRuleTests(TestCase):
         self.user.save()
         with self.assertRaises(ValidationError):
             self.make().full_clean()
+
+
+class ReservationViewTests(TestCase):
+    """
+    TR: Rezervasyon ekranlarının testleri (oluşturma, listeleme, iptal, gizlilik).
+    ES: Pruebas de las pantallas de reserva (crear, listar, cancelar, privacidad).
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="ogrenci1", password="test12345", first_name="Ali")
+        self.other = User.objects.create_user(username="ogrenci2", password="test12345", first_name="Zeynep")
+        self.space = Space.objects.create(
+            name="Çalışma Odası A", space_type=Space.SpaceType.STUDY_ROOM,
+            building="Merkez Kütüphane", capacity=6,
+        )
+        self.tomorrow = timezone.localdate() + timedelta(days=1)
+        self.client.force_login(self.user)
+
+    def post_reservation(self, start="10:00", end="11:00"):
+        return self.client.post(
+            reverse("reservations:create", args=[self.space.pk]),
+            {"date": self.tomorrow.isoformat(), "start": start, "end": end, "purpose": "Grup çalışması"},
+        )
+
+    def test_pages_require_login(self):
+        # TR: Giriş yapmayan kullanıcı giriş sayfasına yönlendirilir
+        # ES: Un usuario sin sesión es redirigido a la página de inicio de sesión
+        self.client.logout()
+        for url in [reverse("spaces:list"), reverse("reservations:my")]:
+            self.assertRedirects(self.client.get(url), f"{reverse('accounts:login')}?next={url}")
+
+    def test_create_reservation(self):
+        response = self.post_reservation()
+        self.assertRedirects(response, reverse("reservations:my"))
+        r = Reservation.objects.get()
+        self.assertEqual(r.user, self.user)
+        self.assertEqual(timezone.localtime(r.start_time).hour, 10)
+
+    def test_conflict_shows_error(self):
+        self.post_reservation()
+        self.client.force_login(self.other)
+        response = self.post_reservation("10:30", "11:30")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "çakışmaktadır")
+        self.assertEqual(Reservation.objects.count(), 1)
+
+    def test_cancel_own_reservation(self):
+        self.post_reservation()
+        r = Reservation.objects.get()
+        self.client.post(reverse("reservations:cancel", args=[r.pk]))
+        r.refresh_from_db()
+        self.assertEqual(r.status, Reservation.Status.CANCELLED)
+
+    def test_cannot_cancel_others_reservation(self):
+        self.post_reservation()
+        r = Reservation.objects.get()
+        self.client.force_login(self.other)
+        response = self.client.post(reverse("reservations:cancel", args=[r.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_space_detail_hides_who_reserved(self):
+        # TR: Müsaitlik tablosunda rezervasyonu yapanın adı görünmez (KVKK)
+        # ES: En la tabla de disponibilidad no aparece el nombre de quien reservó (KVKK)
+        self.post_reservation()
+        self.client.force_login(self.other)
+        response = self.client.get(reverse("spaces:detail", args=[self.space.pk]))
+        self.assertContains(response, "10:00–11:00")
+        self.assertNotContains(response, "Ali")

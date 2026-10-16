@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Rezervasyonlarım · KampüsRez{% endblock %}
+
+{% block content %}
+    <h1>Rezervasyonlarım</h1>
+
+    <h2>Yaklaşan</h2>
+    {% if upcoming %}
+        <table class="table">
+            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Durum</th><th></th></tr></thead>
+            <tbody>
+                {% for r in upcoming %}
+                    <tr>
+                        <td><a href="{% url 'spaces:detail' r.space.pk %}">{{ r.space.name }}</a></td>
+                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
+                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                        <td><span class="status {{ r.status }}">{{ r.get_status_display }}</span></td>
+                        <td>
+                            {% if r.can_be_cancelled %}
+                                <form method="post" action="{% url 'reservations:cancel' r.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="link-button danger">İptal et</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">Yaklaşan rezervasyonunuz yok. <a href="{% url 'spaces:list' %}">Bir alan seçin</a>.</p>
+    {% endif %}
+
+    <h2>Geçmiş</h2>
+    {% if past %}
+        <table class="table">
+            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Durum</th></tr></thead>
+            <tbody>
+                {% for r in past %}
+                    <tr>
+                        <td>{{ r.space.name }}</td>
+                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
+                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                        <td>
+                            <span class="status {{ r.status }}">{{ r.get_status_display }}</span>
+                            {% if r.no_show %}<span class="status rejected">Gelmedi</span>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">Geçmiş rezervasyonunuz yok.</p>
+    {% endif %}
+{% endblock %}

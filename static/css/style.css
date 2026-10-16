@@ -49,3 +49,62 @@ body {
 .message.success { background: #e3f9e5; }
 
 .footer { text-align: center; padding: 1rem; color: var(--muted); font-size: 0.875rem; }
+
+/* TR: Butonlar / ES: Botones */
+.button {
+    display: inline-block; padding: 0.6rem 1.1rem; border: none; border-radius: 6px;
+    background: var(--primary); color: #fff; text-decoration: none; font-size: 1rem; cursor: pointer;
+}
+.button:hover { opacity: 0.9; }
+.button.secondary { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.button.full { width: 100%; margin-top: 0.5rem; }
+.link-button { background: none; border: none; color: inherit; cursor: pointer; font: inherit; padding: 0; margin-left: 1rem; }
+td .link-button { margin-left: 0; }
+.link-button.danger { color: var(--primary); text-decoration: underline; }
+form.inline { display: inline; }
+.hero-actions { margin-top: 1.25rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+/* TR: Formlar / ES: Formularios */
+.form-card { max-width: 440px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+.form-card h1 { margin-top: 0; }
+.field { display: flex; flex-direction: column; margin-bottom: 0.9rem; }
+.field label { font-weight: 600; margin-bottom: 0.3rem; }
+.field input, .field select, .filters select {
+    padding: 0.55rem 0.65rem; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; background: #fff;
+}
+.help { color: var(--muted); margin-top: 0.25rem; }
+.help ul { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+.error-text { color: var(--primary); margin-top: 0.25rem; }
+.filters { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1.5rem; }
+
+/* TR: Kartlar, rozetler, tablolar / ES: Tarjetas, etiquetas, tablas */
+.card-link { text-decoration: none; color: inherit; transition: border-color 0.15s; }
+.card-link:hover { border-color: var(--primary); }
+.card-link p { margin: 0.25rem 0; }
+.badge { display: inline-block; font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 999px; background: #fde8eb; color: var(--primary); }
+.detail-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.detail-header h1 { margin: 0.4rem 0 0.2rem; }
+.back { display: inline-block; margin-bottom: 1rem; color: var(--muted); text-decoration: none; }
+.table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 2rem; }
+.table th, .table td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
+.table th { background: #f0f2f5; font-size: 0.875rem; }
+.slot { display: inline-block; font-size: 0.85rem; padding: 0.15rem 0.5rem; border-radius: 4px; margin: 0.1rem 0.25rem 0.1rem 0; }
+.slot.busy { background: #ffe3e3; color: #8a1c1c; }
+.slot.free { background: #e3f9e5; color: #1f6b2a; }
+.status { font-size: 0.8rem; padding: 0.15rem 0.5rem; border-radius: 4px; background: #eef0f3; }
+.status.approved { background: #e3f9e5; color: #1f6b2a; }
+.status.pending { background: #fff3c4; color: #7a5b00; }
+.status.rejected, .status.cancelled { background: #ffe3e3; color: #8a1c1c; }
+.message.info { background: #fff3c4; }
+ul.plain { list-style: none; padding: 0; margin: 0; }
+ul.plain li { margin: 0.2rem 0; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.center { text-align: center; }
+
+/* TR: Mobil uyum / ES: Adaptación a móvil */
+@media (max-width: 640px) {
+    .topbar { flex-direction: column; gap: 0.5rem; }
+    .topbar nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 0; }
+    .table { font-size: 0.85rem; display: block; overflow-x: auto; }
+}

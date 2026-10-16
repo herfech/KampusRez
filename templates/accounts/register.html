@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Kayıt Ol · KampüsRez{% endblock %}
+
+{% block content %}
+    <div class="form-card">
+        <h1>Kayıt Ol</h1>
+        <p class="muted">Kurumsal e-posta adresinizle kayıt olabilirsiniz.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% include "partials/form_fields.html" %}
+            {# TR: KVKK aydınlatma notu / ES: Aviso informativo de la KVKK #}
+            <p class="small muted">
+                Kayıt sırasında yalnızca ad-soyad, öğrenci/personel numarası ve kurumsal e-posta adresiniz
+                rezervasyon hizmetinin yürütülmesi amacıyla işlenir. Rezervasyon bilgileriniz diğer
+                kullanıcılara gösterilmez.
+            </p>
+            <button type="submit" class="button full">Kayıt Ol</button>
+        </form>
+        <p class="muted center">Zaten hesabınız var mı? <a href="{% url 'accounts:login' %}">Giriş yapın</a></p>
+    </div>
+{% endblock %}

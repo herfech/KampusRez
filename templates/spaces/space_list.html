@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Alanlar · KampüsRez{% endblock %}
+
+{% block content %}
+    <h1>Alanlar</h1>
+
+    {# TR: Filtreler (GET ile, sayfa adresinde görünür) / ES: Filtros (por GET, visibles en la URL) #}
+    <form method="get" class="filters">
+        <select name="tur" aria-label="Alan türü">
+            <option value="">Tüm türler</option>
+            {% for value, label in space_types %}
+                <option value="{{ value }}" {% if value == selected_type %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select name="bina" aria-label="Bina">
+            <option value="">Tüm binalar</option>
+            {% for building in buildings %}
+                <option value="{{ building }}" {% if building == selected_building %}selected{% endif %}>{{ building }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="button">Filtrele</button>
+        {% if selected_type or selected_building %}<a href="{% url 'spaces:list' %}">Temizle</a>{% endif %}
+    </form>
+
+    <div class="cards">
+        {% for space in spaces %}
+            <a href="{% url 'spaces:detail' space.pk %}" class="card card-link">
+                <span class="badge">{{ space.get_space_type_display }}</span>
+                <h2>{{ space.name }}</h2>
+                <p>{{ space.building }}{% if space.floor %} · Kat: {{ space.floor }}{% endif %}</p>
+                <p>Kapasite: {{ space.capacity }} kişi</p>
+                <p class="small">
+                    {% if space.requires_approval %}Personel onayı gerekir{% else %}Anında onay{% endif %}
+                </p>
+            </a>
+        {% empty %}
+            <p class="muted">Bu kriterlere uygun alan bulunamadı.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -3,11 +3,18 @@
 {% block title %}Ana Sayfa · KampüsRez{% endblock %}
 
 {% block content %}
-    {# TR: Geçici ana sayfa — takvim ve rezervasyon ekranları sonraki sprintlerde eklenecek #}
-    {# ES: Página de inicio temporal — el calendario y las pantallas de reserva se añadirán en próximos sprints #}
     <section class="hero">
         <h1>KampüsRez</h1>
         <p>Derslik, laboratuvar ve çalışma alanı rezervasyon sistemi</p>
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'spaces:list' %}" class="button">Alanlara göz at</a>
+                <a href="{% url 'reservations:my' %}" class="button secondary">Rezervasyonlarım</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="button">Giriş Yap</a>
+                <a href="{% url 'accounts:register' %}" class="button secondary">Kayıt Ol</a>
+            {% endif %}
+        </div>
     </section>
 
     <section class="cards">

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Rezervasyon Yap · KampüsRez{% endblock %}
+
+{% block content %}
+    <a href="{% url 'spaces:detail' space.pk %}" class="back">← {{ space.name }}</a>
+
+    <div class="form-card">
+        <h1>Rezervasyon Yap</h1>
+        <p class="muted">
+            {{ space.name }} · {{ space.building }}<br>
+            En fazla {{ space.max_duration_hours }} saat ·
+            {% if space.requires_approval %}personel onayı gerekir{% else %}anında onaylanır{% endif %}
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            {% include "partials/form_fields.html" %}
+            <button type="submit" class="button full">Rezervasyonu Oluştur</button>
+        </form>
+    </div>
+{% endblock %}
