@@ -43,7 +43,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -94,6 +93,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # TR: Dil ve saat dilimi — arayüz Türkçe, saatler İstanbul saatine göre
 # ES: Idioma y zona horaria — interfaz en turco, horas según Estambul
+# TR: Sistem her ziyaretçiye Türkçe gösterilir; tarayıcının dili dikkate alınmaz
+#     (bu yüzden LocaleMiddleware kullanılmıyor).
+# ES: El sistema se muestra en turco a todos los visitantes; no se tiene en cuenta el idioma del navegador
+#     (por eso no se usa LocaleMiddleware).
 LANGUAGE_CODE = "tr"
 TIME_ZONE = "Europe/Istanbul"
 USE_I18N = True

@@ -45,3 +45,12 @@ class RegisterTests(TestCase):
         # ES: Si la lista está vacía se acepta cualquier correo (modo desarrollo)
         response = self.client.post(reverse("accounts:register"), self.data("ayse@gmail.com"))
         self.assertRedirects(response, reverse("spaces:list"))
+
+
+class LanguageTests(TestCase):
+    def test_page_is_turkish_even_with_spanish_browser(self):
+        # TR: Tarayıcı İspanyolca olsa bile Django'nun hazır metinleri Türkçe gösterilir
+        # ES: Aunque el navegador esté en español, los textos propios de Django salen en turco
+        response = self.client.get(reverse("accounts:register"), HTTP_ACCEPT_LANGUAGE="es")
+        self.assertContains(response, "Parola")
+        self.assertNotContains(response, "Contraseña")
