@@ -68,4 +68,9 @@ class LoginForm(AuthenticationForm):
     username = forms.CharField(label="E-posta", widget=forms.TextInput(attrs={"autofocus": True}))
 
     def clean_username(self):
-        return self.cleaned_data["username"].strip().lower()
+        # TR: Sadece e-postalar küçük harfe çevrilir (kayıtta e-postalar küçük harfle saklanır).
+        #     "createsuperuser" ile açılan kullanıcı adları (ör. "KampusRez") olduğu gibi bırakılır.
+        # ES: Solo los correos se pasan a minúsculas (en el registro se guardan en minúsculas).
+        #     Los nombres de usuario creados con "createsuperuser" (p. ej., "KampusRez") se dejan tal cual.
+        username = self.cleaned_data["username"].strip()
+        return username.lower() if "@" in username else username
