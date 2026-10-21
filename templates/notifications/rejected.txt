@@ -1,0 +1,10 @@
+{% autoescape off %}Merhaba {{ user.first_name|default:user.username }},
+
+Aşağıdaki rezervasyon talebiniz reddedildi.
+
+{% include "notifications/_details.txt" %}
+
+Başka bir saat veya alan için yeni bir talep oluşturabilirsiniz.
+
+KampüsRez
+{% endautoescape %}

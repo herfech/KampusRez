@@ -15,6 +15,7 @@
             {% if user.is_authenticated %}
                 <a href="{% url 'spaces:list' %}">Alanlar</a>
                 <a href="{% url 'reservations:my' %}">Rezervasyonlarım</a>
+                {% if user.can_manage_reservations %}<a href="{% url 'reservations:manage' %}">Onay Paneli</a>{% endif %}
                 {% if user.is_staff %}<a href="{% url 'admin:index' %}">Yönetim Paneli</a>{% endif %}
                 {# TR: Çıkış POST ile yapılır / ES: El cierre de sesión se hace por POST #}
                 <form method="post" action="{% url 'accounts:logout' %}" class="inline">

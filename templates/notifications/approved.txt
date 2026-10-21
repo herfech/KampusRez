@@ -1,0 +1,11 @@
+{% autoescape off %}Merhaba {{ user.first_name|default:user.username }},
+
+Rezervasyonunuz onaylandı.
+
+{% include "notifications/_details.txt" %}
+
+Gelemeyecekseniz lütfen rezervasyonunuzu iptal edin; böylece alan başkaları tarafından kullanılabilir.
+Gelmeme durumlarının tekrarlanması rezervasyon hakkınızın geçici olarak kısıtlanmasına yol açabilir.
+
+KampüsRez
+{% endautoescape %}

@@ -1,6 +1,10 @@
 """
-TR: Geliştirme ve sunum için örnek alanlar oluşturur. Çalıştırmak için: python manage.py demo_data
-ES: Crea espacios de ejemplo para desarrollo y presentación. Para ejecutarlo: python manage.py demo_data
+TR: Geliştirme ve sunum için örnek alanlar oluşturur veya siler.
+    Oluşturmak için : python manage.py demo_data
+    Silmek için     : python manage.py demo_data --sil
+ES: Crea o borra espacios de ejemplo para desarrollo y presentación.
+    Para crearlos   : python manage.py demo_data
+    Para borrarlos  : python manage.py demo_data --sil
 """
 from django.core.management.base import BaseCommand
 
@@ -26,9 +30,25 @@ DEMO_SPACES = [
 
 
 class Command(BaseCommand):
-    help = "Örnek alanlar oluşturur (aynı isimde alan varsa atlar)."
+    help = "Örnek alanlar oluşturur; --sil ile yalnızca örnek alanları siler."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--sil", action="store_true",
+            help="Örnek alanları ve bu alanlara ait rezervasyonları siler (diğer alanlara dokunmaz).",
+        )
 
     def handle(self, *args, **options):
+        if options["sil"]:
+            # TR: Sadece bu listedeki alanlar silinir; elle eklenen alanlar korunur
+            # ES: Solo se borran los espacios de esta lista; los añadidos a mano se conservan
+            deleted = 0
+            for data in DEMO_SPACES:
+                count, _ = Space.objects.filter(name=data["name"], building=data["building"]).delete()
+                deleted += bool(count)
+            self.stdout.write(self.style.WARNING(f"{deleted} örnek alan (ve rezervasyonları) silindi."))
+            return
+
         created = 0
         for data in DEMO_SPACES:
             # TR: Aynı alan iki kez oluşturulmasın / ES: Evitar crear el mismo espacio dos veces

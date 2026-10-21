@@ -12,6 +12,12 @@
             En fazla {{ space.max_duration_hours }} saat ·
             {% if space.requires_approval %}personel onayı gerekir{% else %}anında onaylanır{% endif %}
         </p>
+        {# TR: Kısıtlı kullanıcıya önceden uyarı / ES: Aviso previo al usuario restringido #}
+        {% if user.is_restricted %}
+            <div class="message error">
+                Gelmeme nedeniyle rezervasyon hakkınız {{ user.restricted_until|date:"d.m.Y" }} tarihine kadar kısıtlanmıştır.
+            </div>
+        {% endif %}
         <form method="post">
             {% csrf_token %}
             {% include "partials/form_fields.html" %}

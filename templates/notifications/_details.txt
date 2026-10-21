@@ -1,0 +1,4 @@
+Alan   : {{ reservation.space.name }} ({{ reservation.space.building }})
+Tarih  : {{ reservation.start_time|date:"d.m.Y l" }}
+Saat   : {{ reservation.start_time|time:"H:i" }}–{{ reservation.end_time|time:"H:i" }}{% if reservation.purpose %}
+Amaç   : {{ reservation.purpose }}{% endif %}

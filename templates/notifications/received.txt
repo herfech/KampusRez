@@ -1,0 +1,10 @@
+{% autoescape off %}Merhaba {{ user.first_name|default:user.username }},
+
+Rezervasyon talebiniz alındı ve personel onayı beklemektedir.
+
+{% include "notifications/_details.txt" %}
+
+Talebiniz onaylandığında veya reddedildiğinde size ayrıca bilgi verilecektir.
+
+KampüsRez
+{% endautoescape %}

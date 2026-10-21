@@ -108,3 +108,8 @@ ul.plain li { margin: 0.2rem 0; }
     .topbar nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 0; }
     .table { font-size: 0.85rem; display: block; overflow-x: auto; }
 }
+
+/* TR: Onay paneli / ES: Panel de aprobación */
+.actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.small-button { padding: 0.35rem 0.75rem; font-size: 0.875rem; }
+.count { display: inline-block; min-width: 1.6rem; text-align: center; font-size: 0.85rem; padding: 0.1rem 0.45rem; border-radius: 999px; background: var(--primary); color: #fff; vertical-align: middle; }

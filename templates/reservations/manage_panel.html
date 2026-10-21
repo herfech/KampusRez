@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Onay Paneli · KampüsRez{% endblock %}
+
+{% block content %}
+    <h1>Onay Paneli</h1>
+
+    {# TR: Onay bekleyen talepler / ES: Solicitudes pendientes de aprobación #}
+    <h2>Onay Bekleyenler <span class="count">{{ pending|length }}</span></h2>
+    {% if pending %}
+        <table class="table">
+            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Kullanıcı</th><th>Amaç</th><th></th></tr></thead>
+            <tbody>
+                {% for r in pending %}
+                    <tr>
+                        <td>{{ r.space.name }}<br><small class="muted">{{ r.space.building }}</small></td>
+                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
+                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                        <td>{{ r.user }}<br><small class="muted">{{ r.user.get_role_display }}</small></td>
+                        <td>{{ r.purpose|default:"—" }}</td>
+                        <td>
+                            <div class="actions">
+                            <form method="post" action="{% url 'reservations:manage_action' r.pk 'onayla' %}">
+                                {% csrf_token %}<button type="submit" class="button small-button">Onayla</button>
+                            </form>
+                            <form method="post" action="{% url 'reservations:manage_action' r.pk 'reddet' %}">
+                                {% csrf_token %}<button type="submit" class="button secondary small-button">Reddet</button>
+                            </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">Onay bekleyen talep yok.</p>
+    {% endif %}
+
+    {# TR: Son 3 günün onaylı rezervasyonları — gelmeyenler işaretlenir #}
+    {# ES: Reservas aprobadas de los últimos 3 días — se marcan las ausencias #}
+    <h2>Gelmeme Takibi</h2>
+    <p class="muted small">Son 3 gün içinde başlamış onaylı rezervasyonlar. Kullanıcı gelmediyse işaretleyin.</p>
+    {% if recent %}
+        <table class="table">
+            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Kullanıcı</th><th></th></tr></thead>
+            <tbody>
+                {% for r in recent %}
+                    <tr>
+                        <td>{{ r.space.name }}</td>
+                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
+                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                        <td>{{ r.user }}</td>
+                        <td>
+                            {% if r.no_show %}
+                                <span class="status rejected">Gelmedi</span>
+                            {% else %}
+                                <form method="post" action="{% url 'reservations:manage_action' r.pk 'gelmedi' %}">
+                                    {% csrf_token %}<button type="submit" class="link-button danger">Gelmedi olarak işaretle</button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">Son 3 günde başlamış onaylı rezervasyon yok.</p>
+    {% endif %}
+{% endblock %}

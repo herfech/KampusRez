@@ -5,7 +5,8 @@ ES: Pruebas de las reglas de reserva. Para ejecutarlas: python manage.py test
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.core import mail
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -173,3 +174,93 @@ class ReservationViewTests(TestCase):
         response = self.client.get(reverse("spaces:detail", args=[self.space.pk]))
         self.assertContains(response, "10:00–11:00")
         self.assertNotContains(response, "Ali")
+
+
+@override_settings(NO_SHOW_LIMIT=2, NO_SHOW_RESTRICTION_DAYS=14)
+class ManagePanelTests(TestCase):
+    """
+    TR: Personel onay paneli, e-posta bildirimleri ve gelmeme kuralı testleri.
+    ES: Pruebas del panel de aprobación, las notificaciones por correo y la regla de no-show.
+    """
+
+    def setUp(self):
+        self.student = User.objects.create_user(
+            username="ogrenci@gumushane.edu.tr", email="ogrenci@gumushane.edu.tr", password="test12345"
+        )
+        self.manager = User.objects.create_user(
+            username="idari@gumushane.edu.tr", password="test12345", role=User.Role.ADMIN
+        )
+        self.lab = Space.objects.create(
+            name="Bilgisayar Lab 1", space_type=Space.SpaceType.LAB,
+            building="Mühendislik", capacity=30, requires_approval=True,
+        )
+        start = timezone.now() + timedelta(days=1)
+        self.pending = Reservation.objects.create(
+            user=self.student, space=self.lab, start_time=start, end_time=start + timedelta(hours=1)
+        )
+
+    def past_approved(self, hours_ago):
+        # TR: Geçmişte başlamış onaylı rezervasyon (clean() atlanır, test verisi)
+        # ES: Reserva aprobada que ya empezó (se omite clean(), son datos de prueba)
+        start = timezone.now() - timedelta(hours=hours_ago)
+        return Reservation.objects.create(
+            user=self.student, space=self.lab, start_time=start, end_time=start + timedelta(hours=1),
+            status=Reservation.Status.APPROVED,
+        )
+
+    def test_student_cannot_open_panel(self):
+        self.client.force_login(self.student)
+        self.assertEqual(self.client.get(reverse("reservations:manage")).status_code, 403)
+
+    def test_manager_sees_pending(self):
+        self.client.force_login(self.manager)
+        response = self.client.get(reverse("reservations:manage"))
+        self.assertContains(response, "Bilgisayar Lab 1")
+
+    def test_approve_sends_email(self):
+        self.client.force_login(self.manager)
+        self.client.post(reverse("reservations:manage_action", args=[self.pending.pk, "onayla"]))
+        self.pending.refresh_from_db()
+        self.assertEqual(self.pending.status, Reservation.Status.APPROVED)
+        self.assertEqual(self.pending.reviewed_by, self.manager)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("onaylandı", mail.outbox[0].subject)
+
+    def test_reject_sends_email(self):
+        self.client.force_login(self.manager)
+        self.client.post(reverse("reservations:manage_action", args=[self.pending.pk, "reddet"]))
+        self.pending.refresh_from_db()
+        self.assertEqual(self.pending.status, Reservation.Status.REJECTED)
+        self.assertIn("reddedildi", mail.outbox[0].subject)
+
+    def test_cannot_approve_twice(self):
+        self.assertTrue(self.pending.approve(by=self.manager))
+        self.assertFalse(self.pending.reject(by=self.manager))
+
+    def test_no_show_restricts_after_limit(self):
+        # TR: Sınır 2: ikinci gelmemede kullanıcı kısıtlanır ve e-posta alır
+        # ES: Límite 2: a la segunda ausencia el usuario queda restringido y recibe un correo
+        self.assertTrue(self.past_approved(5).mark_no_show(by=self.manager))
+        self.student.refresh_from_db()
+        self.assertEqual(self.student.no_show_count, 1)
+        self.assertFalse(self.student.is_restricted)
+
+        self.past_approved(30).mark_no_show(by=self.manager)
+        self.student.refresh_from_db()
+        self.assertTrue(self.student.is_restricted)
+        self.assertEqual(self.student.no_show_count, 0)
+        self.assertIn("kısıtlandı", mail.outbox[-1].subject)
+
+    def test_future_reservation_cannot_be_no_show(self):
+        self.pending.approve(by=self.manager)
+        self.assertFalse(self.pending.mark_no_show(by=self.manager))
+
+    def test_create_pending_sends_received_email(self):
+        self.client.force_login(self.student)
+        tomorrow = timezone.localdate() + timedelta(days=2)
+        self.client.post(
+            reverse("reservations:create", args=[self.lab.pk]),
+            {"date": tomorrow.isoformat(), "start": "09:00", "end": "10:00"},
+        )
+        self.assertIn("alındı", mail.outbox[-1].subject)
+        self.assertIn("Bilgisayar Lab 1", mail.outbox[-1].body)

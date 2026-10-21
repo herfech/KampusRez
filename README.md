@@ -4,7 +4,7 @@
 
 KampüsRez; derslik, bilgisayar laboratuvarı ve çalışma alanlarını tek bir platformda toplayan, müsaitlik durumunu gösteren ve alan türüne göre yapılandırılabilen kurallar ve onay süreçleriyle alanların şeffaf ve adil biçimde paylaşılmasını sağlayan web tabanlı bir rezervasyon sistemidir.
 
-> Gümüşhane Üniversitesi – **Web Proje Yönetimi** dersi grup projesi
+> Gümüşhane Üniversitesi – **Web Proje Yönetimi (BLSEC205)** dersi grup projesi
 > Ders Sorumlusu: Dr. Rabia Yaşa Koştaş
 
 ## Ekip – Alpha Team
@@ -74,14 +74,24 @@ cp .env.example .env           # macOS / Linux
 python manage.py migrate
 python manage.py createsuperuser
 
-# (İsteğe bağlı) Örnek alanları yükleyin
+# (İsteğe bağlı) Örnek alanları yükleyin / silin
 python manage.py demo_data
+python manage.py demo_data --sil
 
 # 6. Sunucuyu başlatın
 python manage.py runserver
 ```
 
 Ardından tarayıcıda `http://127.0.0.1:8000/` (ana sayfa) ve `http://127.0.0.1:8000/admin/` (yönetim paneli) adreslerini açın.
+
+## Roller ve Onay Paneli
+
+- Kayıt olan her kullanıcı **öğrenci** rolüyle başlar.
+- **Yönetici** rolü yönetim panelinden (`/admin/`) verilir. Yönetici rolündeki kullanıcılar
+  `/rezervasyonlarim/yonetim/` adresindeki **Onay Paneli**'nde talepleri onaylayabilir/reddedebilir
+  ve gelmeyen kullanıcıları işaretleyebilir.
+- Bir kullanıcı `NO_SHOW_LIMIT` kez gelmezse `NO_SHOW_RESTRICTION_DAYS` gün boyunca rezervasyon yapamaz.
+- Geliştirme ortamında e-postalar gönderilmez, `runserver` çalışan terminale yazdırılır.
 
 ## Testler
 

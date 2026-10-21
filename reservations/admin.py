@@ -12,18 +12,14 @@ class ReservationAdmin(admin.ModelAdmin):
     autocomplete_fields = ("user",)
     actions = ["approve", "reject"]
 
-    # TR: Toplu onay/ret işlemleri (personel için)
-    # ES: Acciones para aprobar/rechazar en bloque (para el personal)
+    # TR: Toplu onay/ret. Modeldeki metotlar kullanılır, böylece kullanıcıya e-posta da gider.
+    # ES: Aprobación/rechazo en bloque. Se usan los métodos del modelo para que también se envíe el correo.
     @admin.action(description="Seçili rezervasyonları onayla")
     def approve(self, request, queryset):
-        updated = queryset.filter(status=Reservation.Status.PENDING).update(
-            status=Reservation.Status.APPROVED, reviewed_by=request.user
-        )
-        self.message_user(request, f"{updated} rezervasyon onaylandı.")
+        done = sum(r.approve(by=request.user) for r in queryset.filter(status=Reservation.Status.PENDING))
+        self.message_user(request, f"{done} rezervasyon onaylandı.")
 
     @admin.action(description="Seçili rezervasyonları reddet")
     def reject(self, request, queryset):
-        updated = queryset.filter(status=Reservation.Status.PENDING).update(
-            status=Reservation.Status.REJECTED, reviewed_by=request.user
-        )
-        self.message_user(request, f"{updated} rezervasyon reddedildi.")
+        done = sum(r.reject(by=request.user) for r in queryset.filter(status=Reservation.Status.PENDING))
+        self.message_user(request, f"{done} rezervasyon reddedildi.")

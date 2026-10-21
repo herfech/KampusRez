@@ -14,6 +14,10 @@ def is_institutional_email(email):
     TR: E-posta, izin verilen kurumsal alan adlarından birine mi ait? (alt alan adları da kabul edilir)
     ES: ¿El correo pertenece a uno de los dominios institucionales permitidos? (se aceptan subdominios)
     """
+    # TR: Liste boşsa kısıtlama yok (geliştirme modu)
+    # ES: Si la lista está vacía no hay restricción (modo desarrollo)
+    if not settings.ALLOWED_EMAIL_DOMAINS:
+        return True
     domain = email.rsplit("@", 1)[-1].lower()
     return any(domain == d or domain.endswith("." + d) for d in settings.ALLOWED_EMAIL_DOMAINS)
 

@@ -1,0 +1,9 @@
+{% autoescape off %}Merhaba {{ user.first_name|default:user.username }},
+
+Rezervasyonlarınıza {{ no_show_count }} kez gelmediğiniz için rezervasyon hakkınız
+{{ user.restricted_until|date:"d.m.Y" }} tarihine kadar kısıtlanmıştır.
+
+Bu kararın hatalı olduğunu düşünüyorsanız yönetici ile iletişime geçebilirsiniz.
+
+KampüsRez
+{% endautoescape %}

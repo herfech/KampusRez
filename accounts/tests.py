@@ -38,3 +38,10 @@ class RegisterTests(TestCase):
             reverse("accounts:login"), {"username": "Ali@gumushane.edu.tr", "password": "GucluSifre.2026"}
         )
         self.assertRedirects(response, reverse("spaces:list"))
+
+    @override_settings(ALLOWED_EMAIL_DOMAINS=[])
+    def test_empty_domain_list_accepts_any_email(self):
+        # TR: Liste boşsa her e-posta kabul edilir (geliştirme modu)
+        # ES: Si la lista está vacía se acepta cualquier correo (modo desarrollo)
+        response = self.client.post(reverse("accounts:register"), self.data("ayse@gmail.com"))
+        self.assertRedirects(response, reverse("spaces:list"))

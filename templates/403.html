@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Erişim engellendi · KampüsRez{% endblock %}
+
+{% block content %}
+    <div class="form-card center">
+        <h1>Erişim engellendi</h1>
+        <p class="muted">Bu sayfayı görüntüleme yetkiniz yok.</p>
+        <a href="{% url 'home' %}" class="button">Ana sayfaya dön</a>
+    </div>
+{% endblock %}

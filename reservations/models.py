@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
+from notifications.emails import notify
 from spaces.models import Space
 
 
@@ -162,6 +163,59 @@ class Reservation(models.Model):
             .count()
         )
         return count >= self.space.weekly_limit
+
+    # ------------------------------------------------------------------
+    # TR: Personel işlemleri — durum değişir ve kullanıcıya e-posta gider
+    # ES: Acciones del personal — cambia el estado y se envía un correo al usuario
+    # ------------------------------------------------------------------
+    def approve(self, by):
+        if self.status != self.Status.PENDING:
+            return False
+        self.status = self.Status.APPROVED
+        self.reviewed_by = by
+        self.save(update_fields=["status", "reviewed_by"])
+        notify("approved", self.user, reservation=self)
+        return True
+
+    def reject(self, by):
+        if self.status != self.Status.PENDING:
+            return False
+        self.status = self.Status.REJECTED
+        self.reviewed_by = by
+        self.save(update_fields=["status", "reviewed_by"])
+        notify("rejected", self.user, reservation=self)
+        return True
+
+    @property
+    def can_mark_no_show(self):
+        # TR: Sadece başlamış, onaylı ve henüz işaretlenmemiş rezervasyonlar
+        # ES: Solo reservas aprobadas que ya empezaron y aún no se marcaron
+        return self.status == self.Status.APPROVED and not self.no_show and self.start_time <= timezone.now()
+
+    def mark_no_show(self, by):
+        """
+        TR: Kullanıcının gelmediğini işaretler. Gelmeme sayısı sınıra ulaşırsa kullanıcı
+            belirli bir süre kısıtlanır ve sayaç sıfırlanır.
+        ES: Marca que el usuario no se presentó. Si el número de ausencias llega al límite,
+            el usuario queda restringido durante un tiempo y el contador vuelve a cero.
+        """
+        if not self.can_mark_no_show:
+            return False
+        self.no_show = True
+        self.reviewed_by = by
+        self.save(update_fields=["no_show", "reviewed_by"])
+
+        user = self.user
+        user.no_show_count += 1
+        if user.no_show_count >= settings.NO_SHOW_LIMIT:
+            count = user.no_show_count
+            user.restricted_until = timezone.now() + timedelta(days=settings.NO_SHOW_RESTRICTION_DAYS)
+            user.no_show_count = 0
+            user.save(update_fields=["no_show_count", "restricted_until"])
+            notify("restricted", user, no_show_count=count)
+        else:
+            user.save(update_fields=["no_show_count"])
+        return True
 
     @property
     def can_be_cancelled(self):

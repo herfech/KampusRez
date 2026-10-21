@@ -118,11 +118,18 @@ LOGOUT_REDIRECT_URL = "home"
 #     ör. "gumushane.edu.tr" yazılırsa "ogr.gumushane.edu.tr" de geçerlidir)
 # ES: Dominios de correo institucional aceptados en el registro (también se aceptan subdominios,
 #     p. ej., si se pone "gumushane.edu.tr", "ogr.gumushane.edu.tr" también es válido)
+#     .env'de boş bırakılırsa (ALLOWED_EMAIL_DOMAINS=) her e-posta kabul edilir — sadece geliştirme için!
+#     Si se deja vacío en el .env (ALLOWED_EMAIL_DOMAINS=) se acepta cualquier correo — ¡solo para desarrollo!
 ALLOWED_EMAIL_DOMAINS = [
     d.strip().lower()
     for d in os.environ.get("ALLOWED_EMAIL_DOMAINS", "gumushane.edu.tr").split(",")
     if d.strip()
 ]
+
+# TR: Gelmeme (no-show) kuralı: kullanıcı NO_SHOW_LIMIT kez gelmezse NO_SHOW_RESTRICTION_DAYS gün kısıtlanır
+# ES: Regla de no-show: si el usuario falta NO_SHOW_LIMIT veces, queda restringido NO_SHOW_RESTRICTION_DAYS días
+NO_SHOW_LIMIT = int(os.environ.get("NO_SHOW_LIMIT", 3))
+NO_SHOW_RESTRICTION_DAYS = int(os.environ.get("NO_SHOW_RESTRICTION_DAYS", 14))
 
 
 # TR: E-posta — geliştirmede e-postalar gönderilmez, konsola yazdırılır

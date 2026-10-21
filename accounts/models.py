@@ -4,6 +4,7 @@ ES: Modelo de usuario y roles.
 """
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -39,3 +40,16 @@ class User(AbstractUser):
         # TR: Yönetici rolünde mi?
         # ES: ¿Tiene rol de administrador?
         return self.role == self.Role.ADMIN
+
+    @property
+    def can_manage_reservations(self):
+        """
+        TR: Rezervasyon onaylama/reddetme ve gelmeme işaretleme yetkisi (yönetici rolü veya süper kullanıcı).
+        ES: Permiso para aprobar/rechazar reservas y marcar ausencias (rol administrador o superusuario).
+        """
+        return self.is_authenticated and (self.is_admin_role or self.is_superuser)
+
+    @property
+    def is_restricted(self):
+        # TR: Gelmeme nedeniyle şu an kısıtlı mı? / ES: ¿Está restringido ahora por ausencias?
+        return bool(self.restricted_until and self.restricted_until > timezone.now())
