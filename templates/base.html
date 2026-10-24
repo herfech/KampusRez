@@ -5,41 +5,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}KampüsRez{% endblock %}</title>
+
+    {# TR: Bootstrap 5.3, Bootstrap Icons ve Inter yazı tipi (CDN) #}
+    {# ES: Bootstrap 5.3, Bootstrap Icons y la fuente Inter (CDN) #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
-<body>
-    {# TR: Tüm sayfalarda ortak üst menü / ES: Menú superior común a todas las páginas #}
-    <header class="topbar">
-        <a href="{% url 'home' %}" class="brand">KampüsRez</a>
-        <nav>
-            {% if user.is_authenticated %}
-                <a href="{% url 'spaces:list' %}">Alanlar</a>
-                <a href="{% url 'reservations:my' %}">Rezervasyonlarım</a>
-                {% if user.can_manage_reservations %}<a href="{% url 'reservations:manage' %}">Onay Paneli</a>{% endif %}
-                {% if user.is_staff %}<a href="{% url 'admin:index' %}">Yönetim Paneli</a>{% endif %}
-                {# TR: Çıkış POST ile yapılır / ES: El cierre de sesión se hace por POST #}
-                <form method="post" action="{% url 'accounts:logout' %}" class="inline">
-                    {% csrf_token %}
-                    <button type="submit" class="link-button">Çıkış ({{ user.first_name|default:user.username }})</button>
-                </form>
-            {% else %}
-                <a href="{% url 'accounts:login' %}">Giriş Yap</a>
-                <a href="{% url 'accounts:register' %}">Kayıt Ol</a>
-            {% endif %}
-        </nav>
-    </header>
+<body class="d-flex flex-column min-vh-100">
 
-    <main class="container">
-        {# TR: Sistem mesajları (başarı, hata) / ES: Mensajes del sistema (éxito, error) #}
-        {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
-        {% endfor %}
+    {# TR: Üst menü — mobilde açılır menüye dönüşür / ES: Menú superior — en móvil se convierte en menú desplegable #}
+    <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}">
+                <span class="brand-mark"><i class="bi bi-calendar2-check"></i></span>
+                <span class="fw-bold">KampüsRez</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false" aria-label="Menüyü aç">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        {% block content %}{% endblock %}
+            <div class="collapse navbar-collapse" id="mainNav">
+                {% if user.is_authenticated %}
+                    {% with url_name=request.resolver_match.url_name ns=request.resolver_match.namespace %}
+                    <ul class="navbar-nav me-auto ms-lg-4">
+                        <li class="nav-item">
+                            <a class="nav-link {% if ns == 'spaces' %}active{% endif %}" href="{% url 'spaces:list' %}">
+                                <i class="bi bi-building me-1"></i>Alanlar
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if ns == 'reservations' and url_name != 'manage' %}active{% endif %}" href="{% url 'reservations:my' %}">
+                                <i class="bi bi-calendar-week me-1"></i>Rezervasyonlarım
+                            </a>
+                        </li>
+                        {% if user.can_manage_reservations %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if url_name == 'manage' %}active{% endif %}" href="{% url 'reservations:manage' %}">
+                                    <i class="bi bi-clipboard-check me-1"></i>Onay Paneli
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                    {% endwith %}
+
+                    {# TR: Kullanıcı menüsü / ES: Menú del usuario #}
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="avatar">{{ user.first_name|default:user.username|first|upper }}</span>
+                                <span>{{ user.first_name|default:user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <li><h6 class="dropdown-header">{{ user.get_role_display }}</h6></li>
+                                {% if user.is_staff %}
+                                    <li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-gear me-2"></i>Yönetim Paneli</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li>
+                                    {# TR: Çıkış POST ile yapılır / ES: El cierre de sesión se hace por POST #}
+                                    <form method="post" action="{% url 'accounts:logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                {% else %}
+                    <div class="ms-auto d-flex gap-2 py-2 py-lg-0">
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">Giriş Yap</a>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary">Kayıt Ol</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 py-4 py-lg-5">
+        <div class="container">
+            {# TR: Sistem mesajları (başarı, hata, bilgi) / ES: Mensajes del sistema (éxito, error, información) #}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                    {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                    {% elif message.tags == 'error' %}<i class="bi bi-exclamation-triangle-fill"></i>
+                    {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+                    <span>{{ message }}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                </div>
+            {% endfor %}
+
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
-    <footer class="footer">
-        KampüsRez · Gümüşhane Üniversitesi · Web Proje Yönetimi
+    <footer class="site-footer border-top bg-white">
+        <div class="container py-4 d-flex flex-column flex-md-row justify-content-between gap-2 small text-secondary">
+            <span><i class="bi bi-calendar2-check text-primary me-1"></i><strong class="text-body">KampüsRez</strong> · Derslik, laboratuvar ve çalışma alanı rezervasyon sistemi</span>
+            <span>Gümüşhane Üniversitesi · Web Proje Yönetimi · Alpha Team</span>
+        </div>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

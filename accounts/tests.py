@@ -46,6 +46,15 @@ class RegisterTests(TestCase):
         response = self.client.post(reverse("accounts:register"), self.data("ayse@gmail.com"))
         self.assertRedirects(response, reverse("spaces:list"))
 
+    def test_login_with_mixed_case_username(self):
+        # TR: Büyük harfli kullanıcı adı (createsuperuser) ile giriş yapılabilir
+        # ES: Se puede entrar con un nombre de usuario con mayúsculas (createsuperuser)
+        User.objects.create_superuser(username="KampusRez", email="a@b.com", password="GucluSifre.2026")
+        response = self.client.post(
+            reverse("accounts:login"), {"username": "KampusRez", "password": "GucluSifre.2026"}
+        )
+        self.assertRedirects(response, reverse("spaces:list"))
+
 
 class LanguageTests(TestCase):
     def test_page_is_turkish_even_with_spanish_browser(self):

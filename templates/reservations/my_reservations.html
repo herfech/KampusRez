@@ -1,56 +1,73 @@
 {% extends "base.html" %}
+{% load ui %}
 
 {% block title %}Rezervasyonlarım · KampüsRez{% endblock %}
 
 {% block content %}
-    <h1>Rezervasyonlarım</h1>
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div>
+            <h1>Rezervasyonlarım</h1>
+            <p>Yaklaşan ve geçmiş rezervasyonlarınız.</p>
+        </div>
+        <a href="{% url 'spaces:list' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Yeni Rezervasyon</a>
+    </div>
 
-    <h2>Yaklaşan</h2>
-    {% if upcoming %}
-        <table class="table">
-            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Durum</th><th></th></tr></thead>
-            <tbody>
-                {% for r in upcoming %}
-                    <tr>
-                        <td><a href="{% url 'spaces:detail' r.space.pk %}">{{ r.space.name }}</a></td>
-                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
-                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
-                        <td><span class="status {{ r.status }}">{{ r.get_status_display }}</span></td>
-                        <td>
-                            {% if r.can_be_cancelled %}
-                                <form method="post" action="{% url 'reservations:cancel' r.pk %}">
-                                    {% csrf_token %}
-                                    <button type="submit" class="link-button danger">İptal et</button>
-                                </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="muted">Yaklaşan rezervasyonunuz yok. <a href="{% url 'spaces:list' %}">Bir alan seçin</a>.</p>
-    {% endif %}
+    <div class="card mb-4">
+        <div class="card-header bg-white fw-semibold py-3"><i class="bi bi-calendar-event me-2 text-primary"></i>Yaklaşan</div>
+        {% if upcoming %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Durum</th><th class="text-end">İşlem</th></tr></thead>
+                    <tbody>
+                        {% for r in upcoming %}
+                            <tr>
+                                <td><a href="{% url 'spaces:detail' r.space.pk %}" class="fw-medium">{{ r.space.name }}</a></td>
+                                <td class="text-nowrap">{{ r.start_time|date:"d.m.Y" }}</td>
+                                <td class="text-nowrap">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                                <td>{% status_badge r %}</td>
+                                <td class="text-end">
+                                    {% if r.can_be_cancelled %}
+                                        <form method="post" action="{% url 'reservations:cancel' r.pk %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg me-1"></i>İptal et</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="card-body text-secondary">
+                Yaklaşan rezervasyonunuz yok. <a href="{% url 'spaces:list' %}">Bir alan seçin</a>.
+            </div>
+        {% endif %}
+    </div>
 
-    <h2>Geçmiş</h2>
-    {% if past %}
-        <table class="table">
-            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Durum</th></tr></thead>
-            <tbody>
-                {% for r in past %}
-                    <tr>
-                        <td>{{ r.space.name }}</td>
-                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
-                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
-                        <td>
-                            <span class="status {{ r.status }}">{{ r.get_status_display }}</span>
-                            {% if r.no_show %}<span class="status rejected">Gelmedi</span>{% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="muted">Geçmiş rezervasyonunuz yok.</p>
-    {% endif %}
+    <div class="card">
+        <div class="card-header bg-white fw-semibold py-3"><i class="bi bi-clock-history me-2 text-primary"></i>Geçmiş</div>
+        {% if past %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Durum</th></tr></thead>
+                    <tbody>
+                        {% for r in past %}
+                            <tr>
+                                <td>{{ r.space.name }}</td>
+                                <td class="text-nowrap">{{ r.start_time|date:"d.m.Y" }}</td>
+                                <td class="text-nowrap">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                                <td>
+                                    {% status_badge r %}
+                                    {% if r.no_show %}<span class="badge rounded-pill text-bg-danger ms-1">Gelmedi</span>{% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="card-body text-secondary">Geçmiş rezervasyonunuz yok.</div>
+        {% endif %}
+    </div>
 {% endblock %}

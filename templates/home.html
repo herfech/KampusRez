@@ -3,32 +3,49 @@
 {% block title %}Ana Sayfa · KampüsRez{% endblock %}
 
 {% block content %}
-    <section class="hero">
-        <h1>KampüsRez</h1>
-        <p>Derslik, laboratuvar ve çalışma alanı rezervasyon sistemi</p>
-        <div class="hero-actions">
-            {% if user.is_authenticated %}
-                <a href="{% url 'spaces:list' %}" class="button">Alanlara göz at</a>
-                <a href="{% url 'reservations:my' %}" class="button secondary">Rezervasyonlarım</a>
-            {% else %}
-                <a href="{% url 'accounts:login' %}" class="button">Giriş Yap</a>
-                <a href="{% url 'accounts:register' %}" class="button secondary">Kayıt Ol</a>
-            {% endif %}
+    <section class="hero mb-5">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="badge bg-light text-primary mb-3"><i class="bi bi-mortarboard me-1"></i>Gümüşhane Üniversitesi</span>
+                <h1 class="display-6 mb-3">Derslik, laboratuvar ve çalışma alanlarını tek yerden rezerve edin</h1>
+                <p class="lead mb-4">Boş alanları anında görün, birkaç adımda rezervasyon yapın, onay durumunu takip edin.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'spaces:list' %}" class="btn btn-light btn-lg"><i class="bi bi-search me-2"></i>Alanlara göz at</a>
+                        <a href="{% url 'reservations:my' %}" class="btn btn-outline-light btn-lg">Rezervasyonlarım</a>
+                    {% else %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-light btn-lg">Hemen kayıt ol</a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">Giriş yap</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-flex justify-content-center">
+                <i class="bi bi-calendar2-week" style="font-size: 9rem; opacity: 0.25;"></i>
+            </div>
         </div>
     </section>
 
-    <section class="cards">
-        <div class="card">
-            <h2>Derslikler</h2>
-            <p>Ek ders, telafi dersi ve sunumlar için boş derslikleri bulun.</p>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 p-4">
+                <span class="icon-tile mb-3"><i class="bi bi-easel"></i></span>
+                <h2 class="h5 fw-semibold">Derslikler</h2>
+                <p class="text-secondary mb-0">Ek ders, telafi dersi ve sunumlar için boş derslikleri bulun.</p>
+            </div>
         </div>
-        <div class="card">
-            <h2>Laboratuvarlar</h2>
-            <p>Bilgisayar laboratuvarlarını personel onayıyla rezerve edin.</p>
+        <div class="col-md-4">
+            <div class="card h-100 p-4">
+                <span class="icon-tile mb-3"><i class="bi bi-pc-display"></i></span>
+                <h2 class="h5 fw-semibold">Laboratuvarlar</h2>
+                <p class="text-secondary mb-0">Bilgisayar laboratuvarlarını personel onayıyla rezerve edin.</p>
+            </div>
         </div>
-        <div class="card">
-            <h2>Çalışma Alanları</h2>
-            <p>Grup çalışmaları için anında onaylanan rezervasyon yapın.</p>
+        <div class="col-md-4">
+            <div class="card h-100 p-4">
+                <span class="icon-tile mb-3"><i class="bi bi-people"></i></span>
+                <h2 class="h5 fw-semibold">Çalışma Alanları</h2>
+                <p class="text-secondary mb-0">Grup çalışmaları için anında onaylanan rezervasyon yapın.</p>
+            </div>
         </div>
-    </section>
+    </div>
 {% endblock %}

@@ -1,53 +1,81 @@
 {% extends "base.html" %}
+{% load ui %}
 
 {% block title %}{{ space.name }} · KampüsRez{% endblock %}
 
 {% block content %}
-    <a href="{% url 'spaces:list' %}" class="back">← Alanlar</a>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'spaces:list' %}">Alanlar</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ space.name }}</li>
+        </ol>
+    </nav>
 
-    <div class="detail-header">
-        <div>
-            <span class="badge">{{ space.get_space_type_display }}</span>
-            <h1>{{ space.name }}</h1>
-            <p class="muted">{{ space.building }}{% if space.floor %} · Kat: {{ space.floor }}{% endif %} · {{ space.capacity }} kişi</p>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <span class="icon-tile"><i class="bi {{ space|space_icon }}"></i></span>
+            <div>
+                <h1 class="h3 fw-bold mb-1">{{ space.name }}</h1>
+                <div class="text-secondary">
+                    {{ space.get_space_type_display }} · {{ space.building }}{% if space.floor %} · Kat: {{ space.floor }}{% endif %} · {{ space.capacity }} kişi
+                </div>
+            </div>
         </div>
-        <a href="{% url 'reservations:create' space.pk %}" class="button">Rezervasyon Yap</a>
+        <a href="{% url 'reservations:create' space.pk %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-calendar-plus me-2"></i>Rezervasyon Yap
+        </a>
     </div>
 
-    <div class="cards">
-        <div class="card">
-            <h2>Donanım</h2>
-            <p>{{ space.equipment|default:"Belirtilmemiş"|linebreaksbr }}</p>
+    <div class="row g-4">
+        {# TR: Dolu saatler — kimin rezerve ettiği gösterilmez (KVKK) #}
+        {# ES: Horas ocupadas — no se muestra quién reservó (KVKK) #}
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-white fw-semibold py-3">
+                    <i class="bi bi-calendar3 me-2 text-primary"></i>Müsaitlik
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead><tr><th>Gün</th><th>Dolu saatler</th></tr></thead>
+                        <tbody>
+                            {% for item in schedule %}
+                                <tr>
+                                    <td class="text-nowrap">{{ item.day|date:"d.m.Y" }} <span class="text-secondary">{{ item.day|date:"l" }}</span></td>
+                                    <td>
+                                        {% for r in item.busy %}
+                                            <span class="slot slot-busy">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</span>
+                                        {% empty %}
+                                            <span class="slot slot-free">Tüm gün boş</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <h2>Kurallar</h2>
-            <ul class="plain">
-                <li>Tek seferde en fazla {{ space.max_duration_hours }} saat</li>
-                <li>Haftada en fazla {{ space.weekly_limit }} rezervasyon</li>
-                <li>En fazla {{ space.max_advance_days }} gün önceden</li>
-                <li>{% if space.requires_approval %}Personel onayı gerekir{% else %}Anında onaylanır{% endif %}</li>
-            </ul>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-white fw-semibold py-3"><i class="bi bi-tools me-2 text-primary"></i>Donanım</div>
+                <div class="card-body text-secondary">{{ space.equipment|default:"Belirtilmemiş"|linebreaksbr }}</div>
+            </div>
+            <div class="card">
+                <div class="card-header bg-white fw-semibold py-3"><i class="bi bi-list-check me-2 text-primary"></i>Kurallar</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><i class="bi bi-clock me-2 text-secondary"></i>Tek seferde en fazla {{ space.max_duration_hours }} saat</li>
+                    <li class="list-group-item"><i class="bi bi-calendar-week me-2 text-secondary"></i>Haftada en fazla {{ space.weekly_limit }} rezervasyon</li>
+                    <li class="list-group-item"><i class="bi bi-hourglass me-2 text-secondary"></i>En fazla {{ space.max_advance_days }} gün önceden</li>
+                    <li class="list-group-item">
+                        {% if space.requires_approval %}
+                            <i class="bi bi-shield-check me-2 text-warning"></i>Personel onayı gerekir
+                        {% else %}
+                            <i class="bi bi-lightning-charge me-2 text-success"></i>Anında onaylanır
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
-
-    {# TR: Dolu saatler — kimin rezerve ettiği gösterilmez (KVKK) #}
-    {# ES: Horas ocupadas — no se muestra quién reservó (KVKK) #}
-    <h2>Müsaitlik</h2>
-    <table class="table">
-        <thead><tr><th>Gün</th><th>Dolu saatler</th></tr></thead>
-        <tbody>
-            {% for item in schedule %}
-                <tr>
-                    <td>{{ item.day|date:"d.m.Y l" }}</td>
-                    <td>
-                        {% for r in item.busy %}
-                            <span class="slot busy">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</span>
-                        {% empty %}
-                            <span class="slot free">Tüm gün boş</span>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 {% endblock %}

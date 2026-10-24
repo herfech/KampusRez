@@ -3,14 +3,20 @@
 {% block title %}Giriş Yap · KampüsRez{% endblock %}
 
 {% block content %}
-    <div class="form-card">
-        <h1>Giriş Yap</h1>
-        <form method="post">
+    <div class="card auth-card p-4 p-md-5">
+        <div class="text-center mb-4">
+            <span class="icon-tile mb-3"><i class="bi bi-box-arrow-in-right"></i></span>
+            <h1 class="h3 fw-bold">Giriş Yap</h1>
+            <p class="text-secondary mb-0">Kurumsal e-posta adresiniz ve parolanızla giriş yapın.</p>
+        </div>
+        <form method="post" novalidate>
             {% csrf_token %}
             {% include "partials/form_fields.html" %}
             <input type="hidden" name="next" value="{{ next }}">
-            <button type="submit" class="button full">Giriş Yap</button>
+            <button type="submit" class="btn btn-primary w-100 py-2">Giriş Yap</button>
         </form>
-        <p class="muted center">Hesabınız yok mu? <a href="{% url 'accounts:register' %}">Kayıt olun</a></p>
+        <p class="text-center text-secondary mt-4 mb-0">
+            Hesabınız yok mu? <a href="{% url 'accounts:register' %}">Kayıt olun</a>
+        </p>
     </div>
 {% endblock %}

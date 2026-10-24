@@ -3,67 +3,81 @@
 {% block title %}Onay Paneli · KampüsRez{% endblock %}
 
 {% block content %}
-    <h1>Onay Paneli</h1>
+    <div class="page-header">
+        <h1>Onay Paneli</h1>
+        <p>Onay bekleyen talepleri yönetin ve gelmeyen kullanıcıları işaretleyin.</p>
+    </div>
 
     {# TR: Onay bekleyen talepler / ES: Solicitudes pendientes de aprobación #}
-    <h2>Onay Bekleyenler <span class="count">{{ pending|length }}</span></h2>
-    {% if pending %}
-        <table class="table">
-            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Kullanıcı</th><th>Amaç</th><th></th></tr></thead>
-            <tbody>
-                {% for r in pending %}
-                    <tr>
-                        <td>{{ r.space.name }}<br><small class="muted">{{ r.space.building }}</small></td>
-                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
-                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
-                        <td>{{ r.user }}<br><small class="muted">{{ r.user.get_role_display }}</small></td>
-                        <td>{{ r.purpose|default:"—" }}</td>
-                        <td>
-                            <div class="actions">
-                            <form method="post" action="{% url 'reservations:manage_action' r.pk 'onayla' %}">
-                                {% csrf_token %}<button type="submit" class="button small-button">Onayla</button>
-                            </form>
-                            <form method="post" action="{% url 'reservations:manage_action' r.pk 'reddet' %}">
-                                {% csrf_token %}<button type="submit" class="button secondary small-button">Reddet</button>
-                            </form>
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="muted">Onay bekleyen talep yok.</p>
-    {% endif %}
+    <div class="card mb-4">
+        <div class="card-header bg-white fw-semibold py-3 d-flex align-items-center gap-2">
+            <i class="bi bi-hourglass-split text-warning"></i>Onay Bekleyenler
+            <span class="badge rounded-pill text-bg-primary">{{ pending|length }}</span>
+        </div>
+        {% if pending %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Kullanıcı</th><th>Amaç</th><th class="text-end">İşlem</th></tr></thead>
+                    <tbody>
+                        {% for r in pending %}
+                            <tr>
+                                <td><div class="fw-medium">{{ r.space.name }}</div><small class="text-secondary">{{ r.space.building }}</small></td>
+                                <td class="text-nowrap">{{ r.start_time|date:"d.m.Y" }}</td>
+                                <td class="text-nowrap">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                                <td><div>{{ r.user }}</div><small class="text-secondary">{{ r.user.get_role_display }}</small></td>
+                                <td>{{ r.purpose|default:"—" }}</td>
+                                <td class="text-end text-nowrap">
+                                    <form method="post" action="{% url 'reservations:manage_action' r.pk 'onayla' %}" class="d-inline">
+                                        {% csrf_token %}<button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-lg me-1"></i>Onayla</button>
+                                    </form>
+                                    <form method="post" action="{% url 'reservations:manage_action' r.pk 'reddet' %}" class="d-inline">
+                                        {% csrf_token %}<button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg me-1"></i>Reddet</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="card-body text-secondary"><i class="bi bi-check2-all me-1"></i>Onay bekleyen talep yok.</div>
+        {% endif %}
+    </div>
 
     {# TR: Son 3 günün onaylı rezervasyonları — gelmeyenler işaretlenir #}
     {# ES: Reservas aprobadas de los últimos 3 días — se marcan las ausencias #}
-    <h2>Gelmeme Takibi</h2>
-    <p class="muted small">Son 3 gün içinde başlamış onaylı rezervasyonlar. Kullanıcı gelmediyse işaretleyin.</p>
-    {% if recent %}
-        <table class="table">
-            <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Kullanıcı</th><th></th></tr></thead>
-            <tbody>
-                {% for r in recent %}
-                    <tr>
-                        <td>{{ r.space.name }}</td>
-                        <td>{{ r.start_time|date:"d.m.Y" }}</td>
-                        <td>{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
-                        <td>{{ r.user }}</td>
-                        <td>
-                            {% if r.no_show %}
-                                <span class="status rejected">Gelmedi</span>
-                            {% else %}
-                                <form method="post" action="{% url 'reservations:manage_action' r.pk 'gelmedi' %}">
-                                    {% csrf_token %}<button type="submit" class="link-button danger">Gelmedi olarak işaretle</button>
-                                </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="muted">Son 3 günde başlamış onaylı rezervasyon yok.</p>
-    {% endif %}
+    <div class="card">
+        <div class="card-header bg-white py-3">
+            <div class="fw-semibold"><i class="bi bi-person-x me-2 text-danger"></i>Gelmeme Takibi</div>
+            <small class="text-secondary">Son 3 gün içinde başlamış onaylı rezervasyonlar. Kullanıcı gelmediyse işaretleyin.</small>
+        </div>
+        {% if recent %}
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead><tr><th>Alan</th><th>Tarih</th><th>Saat</th><th>Kullanıcı</th><th class="text-end">İşlem</th></tr></thead>
+                    <tbody>
+                        {% for r in recent %}
+                            <tr>
+                                <td class="fw-medium">{{ r.space.name }}</td>
+                                <td class="text-nowrap">{{ r.start_time|date:"d.m.Y" }}</td>
+                                <td class="text-nowrap">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
+                                <td>{{ r.user }}</td>
+                                <td class="text-end">
+                                    {% if r.no_show %}
+                                        <span class="badge rounded-pill text-bg-danger">Gelmedi</span>
+                                    {% else %}
+                                        <form method="post" action="{% url 'reservations:manage_action' r.pk 'gelmedi' %}" class="d-inline">
+                                            {% csrf_token %}<button type="submit" class="btn btn-sm btn-outline-secondary">Gelmedi olarak işaretle</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="card-body text-secondary">Son 3 günde başlamış onaylı rezervasyon yok.</div>
+        {% endif %}
+    </div>
 {% endblock %}

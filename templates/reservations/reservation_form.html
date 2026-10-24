@@ -3,25 +3,38 @@
 {% block title %}Rezervasyon Yap · KampüsRez{% endblock %}
 
 {% block content %}
-    <a href="{% url 'spaces:detail' space.pk %}" class="back">← {{ space.name }}</a>
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'spaces:list' %}">Alanlar</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'spaces:detail' space.pk %}">{{ space.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Rezervasyon</li>
+        </ol>
+    </nav>
 
-    <div class="form-card">
-        <h1>Rezervasyon Yap</h1>
-        <p class="muted">
+    <div class="card auth-card p-4 p-md-5">
+        <h1 class="h3 fw-bold mb-1">Rezervasyon Yap</h1>
+        <p class="text-secondary mb-4">
             {{ space.name }} · {{ space.building }}<br>
-            En fazla {{ space.max_duration_hours }} saat ·
-            {% if space.requires_approval %}personel onayı gerekir{% else %}anında onaylanır{% endif %}
+            <small>
+                En fazla {{ space.max_duration_hours }} saat ·
+                {% if space.requires_approval %}personel onayı gerekir{% else %}anında onaylanır{% endif %}
+            </small>
         </p>
+
         {# TR: Kısıtlı kullanıcıya önceden uyarı / ES: Aviso previo al usuario restringido #}
-        {% if user.is_restricted %}
-            <div class="message error">
-                Gelmeme nedeniyle rezervasyon hakkınız {{ user.restricted_until|date:"d.m.Y" }} tarihine kadar kısıtlanmıştır.
+        {% if user.is_restricted and not form.errors %}
+            <div class="alert alert-danger d-flex gap-2">
+                <i class="bi bi-slash-circle"></i>
+                <span>Gelmeme nedeniyle rezervasyon hakkınız {{ user.restricted_until|date:"d.m.Y" }} tarihine kadar kısıtlanmıştır.</span>
             </div>
         {% endif %}
-        <form method="post">
+
+        <form method="post" novalidate>
             {% csrf_token %}
             {% include "partials/form_fields.html" %}
-            <button type="submit" class="button full">Rezervasyonu Oluştur</button>
+            <button type="submit" class="btn btn-primary w-100 py-2">
+                <i class="bi bi-check2-circle me-1"></i>Rezervasyonu Oluştur
+            </button>
         </form>
     </div>
 {% endblock %}

@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # TR: Proje uygulamaları / ES: Aplicaciones del proyecto
+    "core",           # TR: Ortak şablon araçları / ES: Utilidades comunes de plantillas
     "accounts",       # TR: Kullanıcı yönetimi ve roller / ES: Usuarios y roles
     "spaces",         # TR: Alan yönetimi / ES: Gestión de espacios
     "reservations",   # TR: Rezervasyon ve onay / ES: Reservas y aprobación
