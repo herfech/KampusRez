@@ -56,3 +56,9 @@ SPACE_ICONS = {
 @register.filter
 def space_icon(space):
     return SPACE_ICONS.get(space.space_type, "bi-building")
+
+
+@register.filter
+def is_checkbox(field):
+    # TR: Onay kutusu alanı mı? (formda farklı çizilir) / ES: ¿Es una casilla? (se dibuja distinto en el formulario)
+    return isinstance(field.field.widget, CheckboxInput)

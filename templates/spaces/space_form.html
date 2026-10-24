@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Alanı Düzenle{% else %}Yeni Alan{% endif %} · KampüsRez{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'spaces:manage' %}">Alan Yönetimi</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% if is_edit %}{{ space.name }}{% else %}Yeni Alan{% endif %}</li>
+        </ol>
+    </nav>
+
+    <div class="page-header">
+        <h1>{% if is_edit %}Alanı Düzenle{% else %}Yeni Alan{% endif %}</h1>
+        <p>{% if is_edit %}Değişiklikler yeni rezervasyonlarda geçerli olur.{% else %}Rezervasyona açılacak yeni bir derslik, laboratuvar veya çalışma alanı ekleyin.{% endif %}</p>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger d-flex gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
+                <div>{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+            </div>
+        {% endif %}
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header bg-white fw-semibold py-3"><i class="bi bi-info-square me-2 text-primary"></i>Genel bilgiler</div>
+                    <div class="card-body">
+                        {% include "partials/form_fields.html" with fields=general_fields skip_errors=True %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-header bg-white fw-semibold py-3"><i class="bi bi-list-check me-2 text-primary"></i>Kurallar</div>
+                    <div class="card-body">
+                        {% include "partials/form_fields.html" with fields=rule_fields skip_errors=True %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check2-circle me-1"></i>{% if is_edit %}Değişiklikleri Kaydet{% else %}Alanı Oluştur{% endif %}</button>
+            <a href="{% url 'spaces:manage' %}" class="btn btn-outline-secondary">Vazgeç</a>
+        </div>
+    </form>
+{% endblock %}

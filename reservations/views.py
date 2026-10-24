@@ -3,7 +3,6 @@ TR: Rezervasyon görünümleri: oluşturma, "Rezervasyonlarım", iptal ve person
 ES: Vistas de reservas: crear, "Mis reservas", cancelar y panel de aprobación del personal.
 """
 from datetime import timedelta
-from functools import wraps
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,25 +11,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from core.decorators import manager_required
 from notifications.emails import notify
 from spaces.models import Space
 
 from .forms import ReservationForm
 from .models import Reservation
-
-
-def manager_required(view):
-    """
-    TR: Sadece rezervasyon yönetme yetkisi olanlar (yönetici rolü) erişebilir.
-    ES: Solo pueden acceder quienes tienen permiso para gestionar reservas (rol administrador).
-    """
-    @wraps(view)
-    @login_required
-    def wrapper(request, *args, **kwargs):
-        if not request.user.can_manage_reservations:
-            raise PermissionDenied
-        return view(request, *args, **kwargs)
-    return wrapper
 
 
 # ----------------------------------------------------------------------

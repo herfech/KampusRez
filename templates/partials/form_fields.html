@@ -1,6 +1,6 @@
 {% load ui %}
 {# TR: Tüm formlarda ortak alan gösterimi (Bootstrap) / ES: Presentación de campos común a todos los formularios (Bootstrap) #}
-{% if form.non_field_errors %}
+{% if form.non_field_errors and not skip_errors %}
     <div class="alert alert-danger d-flex gap-2" role="alert">
         <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
         <div>
@@ -9,11 +9,21 @@
     </div>
 {% endif %}
 
-{% for field in form %}
-    <div class="mb-3">
-        <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
-        {{ field|bootstrap }}
-        {% for error in field.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
-        {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
-    </div>
+{% for field in fields|default:form %}
+    {% if field|is_checkbox %}
+        {# TR: Onay kutusu: etiket yanında / ES: Casilla: etiqueta al lado #}
+        <div class="form-check mb-3">
+            {{ field|bootstrap }}
+            <label for="{{ field.id_for_label }}" class="form-check-label fw-semibold">{{ field.label }}</label>
+            {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+            {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+        </div>
+    {% else %}
+        <div class="mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+            {{ field|bootstrap }}
+            {% for error in field.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+            {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+        </div>
+    {% endif %}
 {% endfor %}

@@ -4,12 +4,17 @@ ES: Vistas de la lista de espacios y del detalle (disponibilidad) de un espacio.
 """
 from datetime import datetime, time, timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
+from django.db.models import Count, Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
+from core.decorators import manager_required
 from reservations.models import Reservation
 
+from .forms import SpaceForm
 from .models import Space
 
 
@@ -74,3 +79,92 @@ def space_detail(request, pk):
     schedule = [{"day": day, "busy": by_day[day]} for day in days]
 
     return render(request, "spaces/space_detail.html", {"space": space, "schedule": schedule})
+
+
+# ----------------------------------------------------------------------
+# TR: Alan yönetimi (sadece yönetici rolü)
+# ES: Gestión de espacios (solo rol administrador)
+# ----------------------------------------------------------------------
+@manager_required
+def manage_list(request):
+    """
+    TR: Açık ve kapalı tüm alanlar; her alanın yaklaşan rezervasyon sayısıyla birlikte.
+    ES: Todos los espacios, abiertos y cerrados, con el número de reservas próximas de cada uno.
+    """
+    now = timezone.now()
+    spaces = Space.objects.annotate(
+        upcoming_count=Count(
+            "reservations",
+            filter=Q(reservations__status__in=Reservation.ACTIVE_STATUSES, reservations__end_time__gte=now),
+        )
+    ).order_by("-is_active", "building", "name")
+    return render(request, "spaces/manage_list.html", {
+        "spaces": spaces,
+        "active_count": sum(1 for s in spaces if s.is_active),
+    })
+
+
+# TR: Formu iki bölüm halinde göstermek için alan grupları
+# ES: Grupos de campos para mostrar el formulario en dos secciones
+GENERAL_FIELDS = ("name", "space_type", "building", "floor", "capacity", "equipment", "is_active")
+RULE_FIELDS = ("requires_approval", "max_duration_hours", "weekly_limit", "max_advance_days")
+
+
+def render_space_form(request, form, **extra):
+    return render(request, "spaces/space_form.html", {
+        "form": form,
+        "general_fields": [form[name] for name in GENERAL_FIELDS],
+        "rule_fields": [form[name] for name in RULE_FIELDS],
+        **extra,
+    })
+
+
+@manager_required
+def manage_create(request):
+    form = SpaceForm(request.POST or None, initial={"is_active": True})
+    if request.method == "POST" and form.is_valid():
+        space = form.save()
+        messages.success(request, f"“{space.name}” alanı oluşturuldu.")
+        return redirect("spaces:manage")
+    return render_space_form(request, form, is_edit=False)
+
+
+@manager_required
+def manage_edit(request, pk):
+    space = get_object_or_404(Space, pk=pk)
+    form = SpaceForm(request.POST or None, instance=space)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"“{space.name}” alanı güncellendi.")
+        return redirect("spaces:manage")
+    return render_space_form(request, form, is_edit=True, space=space)
+
+
+@manager_required
+@require_POST
+def manage_toggle(request, pk):
+    """
+    TR: Alanı rezervasyona açar veya kapatır (silinmez; geçmiş rezervasyonlar ve istatistikler korunur).
+        Mevcut rezervasyonlar iptal edilmez, yöneticiye bilgi verilir.
+    ES: Abre o cierra el espacio a las reservas (no se borra; se conservan el historial y las estadísticas).
+        Las reservas existentes no se cancelan; se informa al administrador.
+    """
+    space = get_object_or_404(Space, pk=pk)
+    space.is_active = not space.is_active
+    space.save(update_fields=["is_active"])
+
+    if space.is_active:
+        messages.success(request, f"“{space.name}” rezervasyona açıldı.")
+    else:
+        upcoming = space.reservations.filter(
+            status__in=Reservation.ACTIVE_STATUSES, end_time__gte=timezone.now()
+        ).count()
+        if upcoming:
+            messages.warning(
+                request,
+                f"“{space.name}” kapatıldı. Bu alanda {upcoming} yaklaşan rezervasyon var; "
+                "gerekirse Onay Paneli'nden veya yönetim panelinden kontrol edin.",
+            )
+        else:
+            messages.success(request, f"“{space.name}” rezervasyona kapatıldı.")
+    return redirect("spaces:manage")

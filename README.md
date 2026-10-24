@@ -4,7 +4,7 @@
 
 KampüsRez; derslik, bilgisayar laboratuvarı ve çalışma alanlarını tek bir platformda toplayan, müsaitlik durumunu gösteren ve alan türüne göre yapılandırılabilen kurallar ve onay süreçleriyle alanların şeffaf ve adil biçimde paylaşılmasını sağlayan web tabanlı bir rezervasyon sistemidir.
 
-> Gümüşhane Üniversitesi – **Web Proje Yönetimi** dersi grup projesi
+> Gümüşhane Üniversitesi – **Web Proje Yönetimi (BLSEC205)** dersi grup projesi
 > Ders Sorumlusu: Dr. Rabia Yaşa Koştaş
 
 ## Ekip – Alpha Team
@@ -92,6 +92,8 @@ Ardından tarayıcıda `http://127.0.0.1:8000/` (ana sayfa) ve `http://127.0.0.1
 - **Yönetici** rolü yönetim panelinden (`/admin/`) verilir. Yönetici rolündeki kullanıcılar
   `/rezervasyonlarim/yonetim/` adresindeki **Onay Paneli**'nde talepleri onaylayabilir/reddedebilir
   ve gelmeyen kullanıcıları işaretleyebilir.
+- Yönetici rolündeki kullanıcılar `/alanlar/yonetim/` adresindeki **Alan Yönetimi** ekranında alan ekleyebilir,
+  düzenleyebilir ve rezervasyona açıp kapatabilir. Alanlar silinmez; geçmiş ve istatistikler korunur.
 - Bir kullanıcı `NO_SHOW_LIMIT` kez gelmezse `NO_SHOW_RESTRICTION_DAYS` gün boyunca rezervasyon yapamaz.
 - Geliştirme ortamında e-postalar gönderilmez, `runserver` çalışan terminale yazdırılır.
 

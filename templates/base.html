@@ -34,19 +34,24 @@
                     {% with url_name=request.resolver_match.url_name ns=request.resolver_match.namespace %}
                     <ul class="navbar-nav me-auto ms-lg-4">
                         <li class="nav-item">
-                            <a class="nav-link {% if ns == 'spaces' %}active{% endif %}" href="{% url 'spaces:list' %}">
+                            <a class="nav-link {% if ns == 'spaces' and 'manage' not in url_name %}active{% endif %}" href="{% url 'spaces:list' %}">
                                 <i class="bi bi-building me-1"></i>Alanlar
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if ns == 'reservations' and url_name != 'manage' %}active{% endif %}" href="{% url 'reservations:my' %}">
+                            <a class="nav-link {% if ns == 'reservations' and 'manage' not in url_name %}active{% endif %}" href="{% url 'reservations:my' %}">
                                 <i class="bi bi-calendar-week me-1"></i>Rezervasyonlarım
                             </a>
                         </li>
                         {% if user.can_manage_reservations %}
                             <li class="nav-item">
-                                <a class="nav-link {% if url_name == 'manage' %}active{% endif %}" href="{% url 'reservations:manage' %}">
+                                <a class="nav-link {% if ns == 'reservations' and 'manage' in url_name %}active{% endif %}" href="{% url 'reservations:manage' %}">
                                     <i class="bi bi-clipboard-check me-1"></i>Onay Paneli
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if ns == 'spaces' and 'manage' in url_name %}active{% endif %}" href="{% url 'spaces:manage' %}">
+                                    <i class="bi bi-building-gear me-1"></i>Alan Yönetimi
                                 </a>
                             </li>
                         {% endif %}
