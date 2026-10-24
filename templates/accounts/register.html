@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Kayıt Ol · KampüsRez{% endblock %}
 
 {% block content %}
     <div class="card auth-card p-4 p-md-5">
         <div class="text-center mb-4">
-            <span class="icon-tile mb-3"><i class="bi bi-person-plus"></i></span>
+            <img src="{% static 'img/logo.svg' %}" alt="" aria-hidden="true" class="auth-symbol mb-3">
             <h1 class="h3 fw-bold">Kayıt Ol</h1>
             <p class="text-secondary mb-0">Kurumsal e-posta adresinizle hesap oluşturun.</p>
         </div>

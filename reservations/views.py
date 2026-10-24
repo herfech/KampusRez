@@ -54,17 +54,71 @@ def reservation_create(request, space_pk):
     return render(request, "reservations/reservation_form.html", {"form": form, "space": space})
 
 
+# TR: Durum filtresi: adres parametresi -> veritabanı değeri
+# ES: Filtro por estado: parámetro de la URL -> valor en la base de datos
+STATUS_FILTERS = {
+    "beklemede": Reservation.Status.PENDING,
+    "onaylandi": Reservation.Status.APPROVED,
+    "reddedildi": Reservation.Status.REJECTED,
+    "iptal": Reservation.Status.CANCELLED,
+}
+
+
 @login_required
 def my_reservations(request):
     """
     TR: Kullanıcının kendi rezervasyonları: yaklaşan ve geçmiş olarak ikiye ayrılır.
+        ?durum=beklemede|onaylandi|reddedildi|iptal ile duruma göre filtrelenebilir.
     ES: Las reservas del propio usuario, separadas en próximas y pasadas.
+        Se pueden filtrar por estado con ?durum=beklemede|onaylandi|reddedildi|iptal.
     """
     now = timezone.now()
     reservations = request.user.reservations.select_related("space")
+
+    # TR: Her durum için sayı (sekmelerde gösterilir) / ES: Número por estado (se muestra en las pestañas)
+    counts = {key: reservations.filter(status=value).count() for key, value in STATUS_FILTERS.items()}
+    tabs = [("", "Tümü", reservations.count())] + [
+        (key, Reservation.Status(value).label, counts[key]) for key, value in STATUS_FILTERS.items()
+    ]
+
+    selected = request.GET.get("durum", "")
+    if selected in STATUS_FILTERS:
+        reservations = reservations.filter(status=STATUS_FILTERS[selected])
+    else:
+        selected = ""
+
     return render(request, "reservations/my_reservations.html", {
         "upcoming": reservations.filter(end_time__gte=now).order_by("start_time"),
         "past": reservations.filter(end_time__lt=now).order_by("-start_time")[:20],
+        "tabs": tabs,
+        "selected": selected,
+    })
+
+
+@login_required
+def reservation_edit(request, pk):
+    """
+    TR: Kullanıcı henüz başlamamış rezervasyonunun tarih/saatini veya amacını değiştirebilir.
+    ES: El usuario puede cambiar la fecha/hora o el motivo de una reserva que aún no ha empezado.
+    """
+    reservation = get_object_or_404(Reservation.objects.select_related("space"), pk=pk, user=request.user)
+    if not reservation.can_be_edited:
+        messages.error(request, "Bu rezervasyon düzenlenemez.")
+        return redirect("reservations:my")
+
+    space = reservation.space
+    form = ReservationForm(request.POST or None, user=request.user, space=space, reservation=reservation)
+    if request.method == "POST" and form.is_valid():
+        reservation = form.save()
+        if form.needs_reapproval:
+            notify("received", request.user, reservation=reservation)
+            messages.info(request, "Rezervasyonunuz güncellendi. Saat değiştiği için yeniden personel onayı bekliyor.")
+        else:
+            messages.success(request, "Rezervasyonunuz güncellendi.")
+        return redirect("reservations:my")
+
+    return render(request, "reservations/reservation_form.html", {
+        "form": form, "space": space, "is_edit": True,
     })
 
 

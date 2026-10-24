@@ -84,14 +84,16 @@ class Reservation(models.Model):
 
         errors = []
         now = timezone.now()
-        is_new = self._state.adding
+        # TR: Yeni kayıt mı, yoksa saati değiştirilen (düzenlenen) bir kayıt mı?
+        # ES: ¿Es una reserva nueva o una existente a la que se le cambió el horario (edición)?
+        is_new_or_rescheduled = self._state.adding or getattr(self, "_rescheduled", False)
 
         if not self.space.is_active:
             errors.append("Bu alan şu anda rezervasyona kapalıdır.")
 
-        # TR: Geçmiş tarih ve "en fazla X gün önceden" kuralları sadece yeni kayıtlarda
-        # ES: Las reglas de fecha pasada y antelación máxima solo se aplican a reservas nuevas
-        if is_new:
+        # TR: Geçmiş tarih ve "en fazla X gün önceden" kuralları yeni veya saati değişen kayıtlarda
+        # ES: Las reglas de fecha pasada y antelación máxima se aplican a reservas nuevas o reprogramadas
+        if is_new_or_rescheduled:
             if self.start_time < now:
                 errors.append("Geçmiş bir tarih için rezervasyon yapılamaz.")
             if self.start_time > now + timedelta(days=self.space.max_advance_days):
@@ -216,6 +218,12 @@ class Reservation(models.Model):
         else:
             user.save(update_fields=["no_show_count"])
         return True
+
+    @property
+    def can_be_edited(self):
+        # TR: Düzenleme kuralları iptal ile aynıdır: henüz başlamamış aktif rezervasyonlar
+        # ES: Las reglas de edición son las mismas que las de cancelación: reservas activas que aún no empezaron
+        return self.can_be_cancelled
 
     @property
     def can_be_cancelled(self):

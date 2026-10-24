@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 140" role="img" aria-label="KampüsRez">
+  <!-- TR: KampüsRez simgesi: 7 modülden oluşan "ü" — mavi nokta boş alan, kırmızı nokta rezervasyon -->
+  <!-- ES: Símbolo de KampüsRez: "ü" formada por 7 módulos — punto azul espacio libre, punto rojo reserva -->
+  <circle cx="14" cy="14" r="13" fill="#1f3b63"/>
+  <circle cx="84" cy="14" r="13" fill="#c8102e"/>
+  <rect x="0" y="42" width="28" height="28" rx="7" fill="#1f3b63"/>
+  <rect x="70" y="42" width="28" height="28" rx="7" fill="#1f3b63"/>
+  <rect x="0" y="77" width="28" height="28" rx="7" fill="#1f3b63"/>
+  <rect x="70" y="77" width="28" height="28" rx="7" fill="#1f3b63"/>
+  <rect x="0" y="112" width="28" height="28" rx="7" fill="#1f3b63"/>
+  <rect x="35" y="112" width="28" height="28" rx="7" fill="#1f3b63"/>
+  <rect x="70" y="112" width="28" height="28" rx="7" fill="#1f3b63"/>
+</svg>

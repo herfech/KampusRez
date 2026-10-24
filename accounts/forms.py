@@ -74,3 +74,20 @@ class LoginForm(AuthenticationForm):
         #     Los nombres de usuario creados con "createsuperuser" (p. ej., "KampusRez") se dejan tal cual.
         username = self.cleaned_data["username"].strip()
         return username.lower() if "@" in username else username
+
+
+class ProfileForm(forms.ModelForm):
+    """
+    TR: Kullanıcının kendi bilgilerini düzenlemesi. E-posta (giriş adı) ve rol burada değiştirilemez.
+    ES: El usuario edita sus propios datos. El correo (nombre de acceso) y el rol no se pueden cambiar aquí.
+    """
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "school_number")
+        labels = {"first_name": "Ad", "last_name": "Soyad"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].required = True
+        self.fields["last_name"].required = True

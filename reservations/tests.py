@@ -2,7 +2,7 @@
 TR: Rezervasyon kurallarının testleri. Çalıştırmak için: python manage.py test
 ES: Pruebas de las reglas de reserva. Para ejecutarlas: python manage.py test
 """
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from django.core.exceptions import ValidationError
 from django.core import mail
@@ -264,3 +264,93 @@ class ManagePanelTests(TestCase):
         )
         self.assertIn("alındı", mail.outbox[-1].subject)
         self.assertIn("Bilgisayar Lab 1", mail.outbox[-1].body)
+
+
+class EditAndFilterTests(TestCase):
+    """
+    TR: Rezervasyon düzenleme ve durum filtresi testleri.
+    ES: Pruebas de edición de reservas y del filtro por estado.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="ogrenci@gumushane.edu.tr", email="o@gumushane.edu.tr", password="x")
+        self.other = User.objects.create_user(username="diger@gumushane.edu.tr", password="x")
+        self.room = Space.objects.create(
+            name="Çalışma Odası A", space_type=Space.SpaceType.STUDY_ROOM, building="Kütüphane", capacity=6,
+        )
+        self.lab = Space.objects.create(
+            name="Lab 1", space_type=Space.SpaceType.LAB, building="Mühendislik", capacity=30, requires_approval=True,
+        )
+        self.day = timezone.localdate() + timedelta(days=2)
+        self.client.force_login(self.user)
+
+    def at(self, hour):
+        return timezone.make_aware(datetime.combine(self.day, time(hour)))
+
+    def make(self, space, hour, status=Reservation.Status.APPROVED, user=None):
+        return Reservation.objects.create(
+            user=user or self.user, space=space, start_time=self.at(hour), end_time=self.at(hour + 1), status=status,
+        )
+
+    def edit(self, reservation, start, end, purpose=""):
+        return self.client.post(reverse("reservations:edit", args=[reservation.pk]), {
+            "date": self.day.isoformat(), "start": start, "end": end, "purpose": purpose,
+        })
+
+    def test_edit_form_is_prefilled(self):
+        r = self.make(self.room, 10)
+        response = self.client.get(reverse("reservations:edit", args=[r.pk]))
+        self.assertContains(response, 'value="10:00"')
+        self.assertContains(response, "Değişiklikleri Kaydet")
+
+    def test_edit_changes_time(self):
+        r = self.make(self.room, 10)
+        self.assertRedirects(self.edit(r, "14:00", "15:00", "Yeni amaç"), reverse("reservations:my"))
+        r.refresh_from_db()
+        self.assertEqual(timezone.localtime(r.start_time).hour, 14)
+        self.assertEqual(r.purpose, "Yeni amaç")
+        self.assertEqual(r.status, Reservation.Status.APPROVED)  # TR: Anında onaylı alan / ES: Espacio sin aprobación
+
+    def test_edit_keeps_own_slot_without_conflict(self):
+        # TR: Kendi saatini değiştirmeden sadece amacı güncellemek çakışma sayılmaz
+        # ES: Cambiar solo el motivo sin tocar la hora no cuenta como solapamiento consigo misma
+        r = self.make(self.room, 10)
+        self.assertRedirects(self.edit(r, "10:00", "11:00", "Sadece amaç"), reverse("reservations:my"))
+
+    def test_edit_conflict_is_rejected(self):
+        self.make(self.room, 14, user=self.other)
+        r = self.make(self.room, 10)
+        response = self.edit(r, "14:30", "15:30")
+        self.assertContains(response, "çakışmaktadır")
+        r.refresh_from_db()
+        self.assertEqual(timezone.localtime(r.start_time).hour, 10)
+
+    def test_rescheduling_approved_lab_goes_back_to_pending(self):
+        r = self.make(self.lab, 10)
+        self.edit(r, "13:00", "14:00")
+        r.refresh_from_db()
+        self.assertEqual(r.status, Reservation.Status.PENDING)
+        self.assertIn("alındı", mail.outbox[-1].subject)
+
+    def test_cannot_edit_others_or_cancelled(self):
+        others = self.make(self.room, 12, user=self.other)
+        self.assertEqual(self.client.get(reverse("reservations:edit", args=[others.pk])).status_code, 404)
+        cancelled = self.make(self.room, 16, status=Reservation.Status.CANCELLED)
+        self.assertRedirects(self.client.get(reverse("reservations:edit", args=[cancelled.pk])), reverse("reservations:my"))
+
+    def test_edit_to_past_is_rejected(self):
+        r = self.make(self.room, 10)
+        response = self.client.post(reverse("reservations:edit", args=[r.pk]), {
+            "date": (timezone.localdate() - timedelta(days=1)).isoformat(), "start": "10:00", "end": "11:00",
+        })
+        self.assertContains(response, "Geçmiş bir tarih")
+
+    def test_status_filter(self):
+        self.make(self.room, 9, status=Reservation.Status.APPROVED)
+        self.make(self.lab, 12, status=Reservation.Status.PENDING)
+        self.make(self.room, 15, status=Reservation.Status.CANCELLED)
+        response = self.client.get(reverse("reservations:my") + "?durum=beklemede")
+        self.assertEqual([r.space.name for r in response.context["upcoming"]], ["Lab 1"])
+        response = self.client.get(reverse("reservations:my"))
+        self.assertEqual(len(response.context["upcoming"]), 3)
+        self.assertContains(response, "Tümü")

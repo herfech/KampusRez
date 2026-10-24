@@ -24,10 +24,12 @@ KampüsRez; derslik, bilgisayar laboratuvarı ve çalışma alanlarını tek bir
 - Rezervasyon oluşturma ve **çakışma kontrolü**
 - Alan bazlı kurallar: en fazla süre, haftalık hak, en fazla kaç gün önceden
 - Onay mekanizması (laboratuvarlar onaylı, çalışma alanları anında)
-- İptal ve e-posta bildirimleri
+- Rezervasyon düzenleme, iptal ve duruma göre filtreleme
+- E-posta bildirimleri
 - Gelmeme (no-show) takibi ve geçici kısıtlama
 - Yönetim paneli ve kullanım istatistikleri
-- Duyarlı (responsive) arayüz
+- Profil sayfası, parola değiştirme ve e-posta ile parola sıfırlama
+- Duyarlı (responsive) arayüz (Bootstrap 5.3 + Bootstrap Icons)
 
 **Kapsam dışı:** fiziksel erişim kontrolü, ders programı hazırlama, envanter takibi, öğrenci bilgi sistemi entegrasyonu, mobil uygulama, SMS ve ödeme.
 
@@ -98,6 +100,19 @@ Ardından tarayıcıda `http://127.0.0.1:8000/` (ana sayfa) ve `http://127.0.0.1
 ```bash
 python manage.py test
 ```
+
+## Logo
+
+Logo, "ü" harfini 7 modülden (alanlar) oluşturur; mavi nokta boş alanı, kırmızı nokta rezervasyonu temsil eder.
+
+| Dosya | Kullanım |
+|---|---|
+| `static/img/logo.svg` | Açık zemin (üst menü, giriş ekranı) |
+| `static/img/logo-white.svg` | Koyu zemin |
+| `static/img/favicon.svg` | Tarayıcı sekmesi ve küçük boyutlar |
+
+Şablonlarda: `{% include "partials/logo.html" %}` (beyaz sürüm: `with variant="white"`).
+Renkler: lacivert `#1f3b63`, kırmızı `#c8102e` · Yazı tipi: Space Grotesk.
 
 ## Kod Kuralları
 

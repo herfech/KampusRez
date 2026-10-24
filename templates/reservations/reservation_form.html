@@ -1,18 +1,23 @@
 {% extends "base.html" %}
 
-{% block title %}Rezervasyon Yap · KampüsRez{% endblock %}
+{% block title %}{% if is_edit %}Rezervasyonu Düzenle{% else %}Rezervasyon Yap{% endif %} · KampüsRez{% endblock %}
 
 {% block content %}
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'spaces:list' %}">Alanlar</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'spaces:detail' space.pk %}">{{ space.name }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Rezervasyon</li>
+            {% if is_edit %}
+                <li class="breadcrumb-item"><a href="{% url 'reservations:my' %}">Rezervasyonlarım</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Düzenle</li>
+            {% else %}
+                <li class="breadcrumb-item"><a href="{% url 'spaces:list' %}">Alanlar</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'spaces:detail' space.pk %}">{{ space.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Rezervasyon</li>
+            {% endif %}
         </ol>
     </nav>
 
     <div class="card auth-card p-4 p-md-5">
-        <h1 class="h3 fw-bold mb-1">Rezervasyon Yap</h1>
+        <h1 class="h3 fw-bold mb-1">{% if is_edit %}Rezervasyonu Düzenle{% else %}Rezervasyon Yap{% endif %}</h1>
         <p class="text-secondary mb-4">
             {{ space.name }} · {{ space.building }}<br>
             <small>
@@ -20,6 +25,15 @@
                 {% if space.requires_approval %}personel onayı gerekir{% else %}anında onaylanır{% endif %}
             </small>
         </p>
+
+        {# TR: Onaylı rezervasyonun saati değişirse yeniden onaya düşeceği bilgisi #}
+        {# ES: Aviso de que, si cambia la hora de una reserva aprobada, vuelve a quedar pendiente #}
+        {% if is_edit and space.requires_approval %}
+            <div class="alert alert-info d-flex gap-2 small">
+                <i class="bi bi-info-circle"></i>
+                <span>Bu alan personel onayı gerektirir. Tarih veya saati değiştirirseniz rezervasyonunuz yeniden onaya gönderilir.</span>
+            </div>
+        {% endif %}
 
         {# TR: Kısıtlı kullanıcıya önceden uyarı / ES: Aviso previo al usuario restringido #}
         {% if user.is_restricted and not form.errors %}
@@ -32,9 +46,16 @@
         <form method="post" novalidate>
             {% csrf_token %}
             {% include "partials/form_fields.html" %}
-            <button type="submit" class="btn btn-primary w-100 py-2">
-                <i class="bi bi-check2-circle me-1"></i>Rezervasyonu Oluştur
-            </button>
+            {% if is_edit %}
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1 py-2"><i class="bi bi-check2-circle me-1"></i>Değişiklikleri Kaydet</button>
+                    <a href="{% url 'reservations:my' %}" class="btn btn-outline-secondary py-2">Vazgeç</a>
+                </div>
+            {% else %}
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    <i class="bi bi-check2-circle me-1"></i>Rezervasyonu Oluştur
+                </button>
+            {% endif %}
         </form>
     </div>
 {% endblock %}

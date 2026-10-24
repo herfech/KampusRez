@@ -1,0 +1,7 @@
+{% load static %}
+{# TR: KampüsRez logosu (simge + yazı). Kullanım: {% include "partials/logo.html" with variant="white" size="lg" %} #}
+{# ES: Logo de KampüsRez (símbolo + texto). Uso: {% include "partials/logo.html" with variant="white" size="lg" %} #}
+<span class="kr-logo{% if variant == 'white' %} kr-logo-white{% endif %}{% if size %} kr-logo-{{ size }}{% endif %}">
+    <img src="{% if variant == 'white' %}{% static 'img/logo-white.svg' %}{% else %}{% static 'img/logo.svg' %}{% endif %}" alt="" class="kr-logo-symbol" aria-hidden="true">
+    <span class="kr-logo-word">kampüs<span class="kr-logo-accent">rez</span></span>
+</span>

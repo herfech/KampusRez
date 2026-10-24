@@ -49,12 +49,23 @@ body { background-color: var(--kr-bg); }
     box-shadow: 0 0 0 0.2rem rgba(31, 59, 99, 0.15);
 }
 
-/* TR: Üst menü / ES: Menú superior */
-.brand-mark {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 2rem; height: 2rem; border-radius: 0.5rem;
-    background: var(--kr-red); color: #fff; font-size: 1rem;
+/* TR: Logo (simge + yazı) / ES: Logo (símbolo + texto) */
+.kr-logo { display: inline-flex; align-items: center; gap: 0.55rem; line-height: 1; }
+.kr-logo-symbol { height: 1.9rem; width: auto; }
+.kr-logo-word {
+    font-family: "Space Grotesk", var(--bs-body-font-family);
+    font-weight: 700; font-size: 1.45rem; letter-spacing: -0.035em; color: var(--kr-navy);
 }
+.kr-logo-accent { color: var(--kr-red); }
+.kr-logo-white .kr-logo-word { color: #fff; }
+.kr-logo-sm .kr-logo-symbol { height: 1.1rem; }
+.kr-logo-sm .kr-logo-word { font-size: 0.95rem; }
+.kr-logo-lg .kr-logo-symbol { height: 3rem; }
+.kr-logo-lg .kr-logo-word { font-size: 2.25rem; }
+.auth-symbol { height: 3rem; width: auto; }
+.hero-symbol { height: 10rem; width: auto; opacity: 0.9; }
+
+/* TR: Üst menü / ES: Menú superior */
 .navbar .nav-link { color: #4a5568; font-weight: 500; }
 .navbar .nav-link:hover { color: var(--kr-navy); }
 .navbar .nav-link.active { color: var(--kr-navy); box-shadow: inset 0 -2px 0 var(--kr-red); }
@@ -98,5 +109,10 @@ body { background-color: var(--kr-bg); }
 .status-badge { font-weight: 500; }
 .table > :not(caption) > * > * { padding: 0.75rem 1rem; }
 .table thead th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: #6b7280; font-weight: 600; background: #f8f9fb; }
+
+.avatar-lg { width: 3.5rem; height: 3.5rem; font-size: 1.35rem; }
+
+.status-tabs .nav-link { color: #4a5568; }
+.status-tabs .nav-link.active { background: var(--kr-navy); color: #fff; }
 
 .site-footer { margin-top: auto; }

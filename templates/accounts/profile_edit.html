@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Bilgilerimi Düzenle · KampüsRez{% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'accounts:profile' %}">Profilim</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Bilgilerimi Düzenle</li>
+        </ol>
+    </nav>
+    <div class="card auth-card p-4 p-md-5">
+        <h1 class="h3 fw-bold mb-1">Bilgilerimi Düzenle</h1>
+        <p class="text-secondary mb-4">E-posta adresiniz giriş adınız olduğu için değiştirilemez.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold">E-posta</label>
+                <input type="text" class="form-control" value="{{ user.email|default:user.username }}" disabled>
+            </div>
+            {% include "partials/form_fields.html" %}
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">Kaydet</button>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Vazgeç</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

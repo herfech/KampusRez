@@ -12,6 +12,18 @@
         <a href="{% url 'spaces:list' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Yeni Rezervasyon</a>
     </div>
 
+    {# TR: Durum sekmeleri (?durum=...) / ES: Pestañas por estado (?durum=...) #}
+    <ul class="nav nav-pills status-tabs flex-nowrap overflow-auto mb-4">
+        {% for key, label, count in tabs %}
+            <li class="nav-item">
+                <a class="nav-link text-nowrap {% if key == selected %}active{% endif %}"
+                   href="{% url 'reservations:my' %}{% if key %}?durum={{ key }}{% endif %}">
+                    {{ label }} <span class="badge rounded-pill {% if key == selected %}text-bg-light{% else %}text-bg-secondary{% endif %} ms-1">{{ count }}</span>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
     <div class="card mb-4">
         <div class="card-header bg-white fw-semibold py-3"><i class="bi bi-calendar-event me-2 text-primary"></i>Yaklaşan</div>
         {% if upcoming %}
@@ -25,7 +37,10 @@
                                 <td class="text-nowrap">{{ r.start_time|date:"d.m.Y" }}</td>
                                 <td class="text-nowrap">{{ r.start_time|time:"H:i" }}–{{ r.end_time|time:"H:i" }}</td>
                                 <td>{% status_badge r %}</td>
-                                <td class="text-end">
+                                <td class="text-end text-nowrap">
+                                    {% if r.can_be_edited %}
+                                        <a href="{% url 'reservations:edit' r.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>Düzenle</a>
+                                    {% endif %}
                                     {% if r.can_be_cancelled %}
                                         <form method="post" action="{% url 'reservations:cancel' r.pk %}" class="d-inline">
                                             {% csrf_token %}
@@ -40,7 +55,7 @@
             </div>
         {% else %}
             <div class="card-body text-secondary">
-                Yaklaşan rezervasyonunuz yok. <a href="{% url 'spaces:list' %}">Bir alan seçin</a>.
+                {% if selected %}Bu durumda yaklaşan rezervasyon yok.{% else %}Yaklaşan rezervasyonunuz yok. <a href="{% url 'spaces:list' %}">Bir alan seçin</a>.{% endif %}
             </div>
         {% endif %}
     </div>
@@ -67,7 +82,7 @@
                 </table>
             </div>
         {% else %}
-            <div class="card-body text-secondary">Geçmiş rezervasyonunuz yok.</div>
+            <div class="card-body text-secondary">{% if selected %}Bu durumda geçmiş rezervasyon yok.{% else %}Geçmiş rezervasyonunuz yok.{% endif %}</div>
         {% endif %}
     </div>
 {% endblock %}
