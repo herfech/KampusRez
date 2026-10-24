@@ -4,7 +4,7 @@
 
 KampüsRez; derslik, bilgisayar laboratuvarı ve çalışma alanlarını tek bir platformda toplayan, müsaitlik durumunu gösteren ve alan türüne göre yapılandırılabilen kurallar ve onay süreçleriyle alanların şeffaf ve adil biçimde paylaşılmasını sağlayan web tabanlı bir rezervasyon sistemidir.
 
-> Gümüşhane Üniversitesi – **Web Proje Yönetimi (BLSEC205)** dersi grup projesi
+> Gümüşhane Üniversitesi – **Web Proje Yönetimi** dersi grup projesi
 > Ders Sorumlusu: Dr. Rabia Yaşa Koştaş
 
 ## Ekip – Alpha Team
